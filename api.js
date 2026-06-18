@@ -45,6 +45,20 @@ class SERFOVER_API {
             return { reportes: [], combustibles: [], mantenciones: [] };
         }
     }
+
+    async deleteData(type, rowId) {
+        try {
+            const response = await fetch(GOOGLE_SHEETS_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'delete', type: type, rowId: rowId }),
+                headers: { 'Content-Type': 'text/plain' }
+            });
+            return { status: 'success' };
+        } catch (error) {
+            console.error('Error eliminando datos:', error);
+            throw error;
+        }
+    }
 }
 
 const API = new SERFOVER_API();

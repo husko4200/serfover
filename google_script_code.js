@@ -13,6 +13,25 @@ function doPost(e) {
       var sheetId = "";
       var rowData = [];
 
+      if (data.action === 'delete') {
+        var sheetIdDelete = "";
+        if (type === 'reporte') sheetIdDelete = "1p4L_ycv1yGRfnPrWmPK0Z6qWPyc5fHlDFKowLDMIsW0";
+        else if (type === 'combustible') sheetIdDelete = "1okXBLROW87oGkq6ePnuSt66miNqoFfS-IwsrmtNMy58";
+        else if (type === 'mantencion') sheetIdDelete = "1Fi15cc1RLt88Lsh5kqyutm9pNTRQn7e4YD9q0JUmgIU";
+
+        if (sheetIdDelete !== "") {
+          var s = SpreadsheetApp.openById(sheetIdDelete).getSheets()[0];
+          var rowId = parseInt(data.rowId);
+          if (rowId > 1) { // No borrar encabezados
+            s.deleteRow(rowId);
+            return ContentService.createTextOutput(JSON.stringify({ status: "success", deletedRow: rowId }))
+              .setMimeType(ContentService.MimeType.JSON);
+          }
+        }
+        return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Invalid row to delete" }))
+              .setMimeType(ContentService.MimeType.JSON);
+      }
+
       if (type === 'reporte') {
         sheetId = "1p4L_ycv1yGRfnPrWmPK0Z6qWPyc5fHlDFKowLDMIsW0";
         rowData = [
@@ -26,6 +45,8 @@ function doPost(e) {
           data.peaje || "",
           data.romana || "",
           data.guia || "",
+          data.viatico || "",
+          data.total || "",
           data.observaciones || "",
           data.imagen || ""
         ];
@@ -97,6 +118,7 @@ function parseData(values, type) {
     var row = values[i];
     if (type === 'reporte') {
       result.push({
+        id: i + 1,
         fecha: row[0],
         driver: row[1],
         movil: row[2],
@@ -107,11 +129,14 @@ function parseData(values, type) {
         peaje: row[7],
         romana: row[8],
         guia: row[9],
-        observaciones: row[10],
-        imagen: row[11]
+        viatico: row[10],
+        total: row[11],
+        observaciones: row[12],
+        imagen: row[13]
       });
     } else if (type === 'combustible') {
       result.push({
+        id: i + 1,
         fecha: row[0],
         driver: row[1],
         litros: row[2],
@@ -121,6 +146,7 @@ function parseData(values, type) {
       });
     } else if (type === 'mantencion') {
       result.push({
+        id: i + 1,
         fecha: row[0],
         driver: row[1],
         tipo: row[2],

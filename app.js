@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (username === 'conductor' && password === '123') {
                 localStorage.setItem('serfover_user', JSON.stringify({ role: 'driver', name: 'Conductor Prueba' }));
                 window.location.href = 'driver.html';
+            } else if (username === 'mecanico' && password === '123') {
+                localStorage.setItem('serfover_user', JSON.stringify({ role: 'mechanic', name: 'Mecánico Jefe' }));
+                window.location.href = 'mechanic.html';
             } else {
                 loginError.style.display = 'block';
             }
@@ -47,11 +50,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const userRoleElement = document.getElementById('userRoleDisplay');
         
         if (userNameElement) userNameElement.textContent = user.name;
-        if (userRoleElement) userRoleElement.textContent = user.role === 'owner' ? 'Administrador' : 'Conductor';
+        
+        let roleDisplay = 'Conductor';
+        if (user.role === 'owner') roleDisplay = 'Administrador';
+        if (user.role === 'mechanic') roleDisplay = 'Mecánico';
+        if (userRoleElement) userRoleElement.textContent = roleDisplay;
         
         // Redirigir si está en login y ya está logueado
         if (currentPath.endsWith('index.html') || currentPath.endsWith('/')) {
-            window.location.href = user.role === 'owner' ? 'dashboard.html' : 'driver.html';
+            if (user.role === 'owner') window.location.href = 'dashboard.html';
+            else if (user.role === 'mechanic') window.location.href = 'mechanic.html';
+            else window.location.href = 'driver.html';
         }
     }
 });

@@ -58,7 +58,11 @@
                 <h3>SERFOVER</h3>
             </div>
             <div class="sidebar-nav">
-                <div class="nav-item active" onclick="switchTab('reporte')">
+                <div class="nav-item active" onclick="switchTab('inicio')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    Inicio
+                </div>
+                <div class="nav-item" onclick="switchTab('reporte')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                     Ingresar Reporte
                 </div>
@@ -69,6 +73,14 @@
                 <div class="nav-item" onclick="switchTab('mantencion')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
                     Mantención
+                </div>
+                <div class="nav-item" onclick="switchTab('historial')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    Mis Reportes
+                </div>
+                <div class="nav-item" onclick="switchTab('historial-mant')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                    Mis Mantenciones
                 </div>
             </div>
             <div class="sidebar-footer">
@@ -96,8 +108,46 @@
 
             <div class="content-area">
                 
+                <!-- INICIO DASHBOARD CONDUCTOR -->
+                <div id="tab-inicio" class="tab-content active">
+                    <div class="card" style="background: linear-gradient(135deg, var(--bg-card), rgba(16, 185, 129, 0.05)); border-color: var(--brand-primary);">
+                        <div class="card-header">
+                            <h3 class="card-title" style="font-size: 1.5rem;">Hola, <span id="dashDriverName">Conductor</span> 👋</h3>
+                        </div>
+                        <div style="padding: 1.5rem;">
+                            <p style="color: var(--text-secondary); margin-bottom: 2rem;">¿Qué deseas hacer hoy?</p>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <button onclick="switchTab('reporte')" class="btn btn-secondary" style="height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                    Ingresar Reporte
+                                </button>
+                                <button onclick="switchTab('combustible')" class="btn btn-secondary" style="height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2"><path d="M3 22v-8c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v8"></path><path d="M12 12v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6"></path><circle cx="12" cy="18" r="2"></circle></svg>
+                                    Combustible
+                                </button>
+                                <button onclick="switchTab('mantencion')" class="btn btn-secondary" style="height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                                    Mantención
+                                </button>
+                                <button onclick="switchTab('historial')" class="btn btn-secondary" style="height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                    Mis Reportes
+                                </button>
+                                <button onclick="switchTab('historial-mant')" class="btn btn-secondary" style="height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                                    Mis Mantenciones
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="driverAlertsContainer" style="margin-top: 1.5rem; display: none;">
+                    </div>
+                </div>
+
                 <!-- REPORTE DE VIAJE -->
-                <div id="tab-reporte" class="tab-content active">
+                <div id="tab-reporte" class="tab-content">
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Nueva Hoja de Ruta</h3>
@@ -129,21 +179,26 @@
                                 <input type="text" id="repFaena" required>
                             </div>
                             
-                            <div class="form-group" style="grid-column: 1 / -1;">
-                                <h4>Datos Adicionales</h4>
-                                <hr style="border-color: var(--border-light); margin: 0.5rem 0 1rem 0;">
-                            </div>
+
                             <div class="form-group">
                                 <label>Peaje</label>
-                                <input type="text" id="repPeaje">
+                                <input type="number" id="repPeaje" oninput="updateTotal()">
                             </div>
                             <div class="form-group">
                                 <label>Romana</label>
-                                <input type="text" id="repRomana">
+                                <input type="number" id="repRomana" oninput="updateTotal()">
                             </div>
                             <div class="form-group">
                                 <label>N° Guía</label>
                                 <input type="text" id="repGuia">
+                            </div>
+                            <div class="form-group">
+                                <label>Viático</label>
+                                <input type="number" id="repViatico">
+                            </div>
+                            <div class="form-group">
+                                <label>Total</label>
+                                <input type="number" id="repTotal" readonly style="background-color: var(--bg-card); cursor: not-allowed;">
                             </div>
 
                             <div class="form-group" style="grid-column: 1 / -1;">
@@ -152,7 +207,7 @@
                             </div>
 
                             <div class="form-group" style="grid-column: 1 / -1;">
-                                <label>Foto de la Hoja de Ruta</label>
+                                <label>Foto de la Guía</label>
                                 <div class="file-upload" onclick="document.getElementById('repImagen').click()">
                                     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                                     <p>Haz clic para subir imagen o tomar foto</p>
@@ -262,12 +317,83 @@
                     </div>
                 </div>
 
+                <!-- HISTORIAL DE REPORTES -->
+                <div id="tab-historial" class="tab-content">
+                    <div class="card">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                            <h3 class="card-title">Mis Reportes</h3>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <label for="driverMonthFilter" style="color: var(--text-secondary); font-size: 0.9rem;">Filtrar por Mes:</label>
+                                <input type="month" id="driverMonthFilter" class="form-control" style="width: auto; padding: 0.4rem;" onchange="loadDriverHistory()">
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table id="tableDriverHistory">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Móvil</th>
+                                        <th>Destino</th>
+                                        <th>N° Guía</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="5" style="text-align: center;">Cargando historial...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- HISTORIAL DE MANTENCIONES -->
+                <div id="tab-historial-mant" class="tab-content">
+                    <div class="card">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                            <h3 class="card-title">Mis Mantenciones (Móvil Asignado)</h3>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <label for="driverMantMonthFilter" style="color: var(--text-secondary); font-size: 0.9rem;">Filtrar por Mes:</label>
+                                <input type="month" id="driverMantMonthFilter" class="form-control" style="width: auto; padding: 0.4rem;" onchange="loadDriverHistory()">
+                            </div>
+                        </div>
+                        <div class="table-container">
+                            <table id="tableDriverMantenciones">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Tipo</th>
+                                        <th>Origen</th>
+                                        <th>Kilometraje</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td colspan="5" style="text-align: center;">Cargando historial...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </main>
     </div>
 
+    <!-- Modal Detalles -->
+    <div id="detailModal" class="modal" style="display: none; position: fixed; inset: 0; background-color: rgba(0, 0, 0, 0.8); z-index: 100; align-items: center; justify-content: center; padding: 2rem;">
+        <div class="modal-content" style="background-color: var(--bg-secondary); border-radius: var(--radius-lg); max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative;">
+            <div class="modal-header" style="padding: 1.5rem; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center;">
+                <h3 id="modalTitle">Detalle</h3>
+                <button class="close-btn" onclick="closeModal()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.5rem;">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody" style="padding: 1.5rem;">
+                <!-- Dinámico -->
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
     <script src="api.js"></script>
-    <script src="driver.js"></script>
+    <script src="driver.js?v=5"></script>
 </body>
 </html>
