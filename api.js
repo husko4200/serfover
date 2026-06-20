@@ -5,7 +5,7 @@
  * Cuando tengas el link del Web App de Google Apps Script, puedes reemplazar el valor de GOOGLE_SHEETS_URL.
  */
 
-const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbxoNAmzlYK4t-91oPRhREB17may0YO-vILcjvMsW_u1n-mD8zwhfR33PJNmcNjV9l_QpQ/exec";
+const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbzGJVLIwUE6DCyB-1WpikacMX9k7wVYfOeoQBXl0ljrwBKvGdss600QA28TGekVybyLvQ/exec";
 
 class SERFOVER_API {
     constructor() {
@@ -26,7 +26,8 @@ class SERFOVER_API {
                 body: JSON.stringify(payload),
                 // Para evitar errores CORS con Google Scripts, a veces es mejor omitir headers restrictivos o usar mode: 'no-cors' 
                 // Pero si usamos Content-Type text/plain funciona mejor con Google
-                headers: { 'Content-Type': 'text/plain' }
+                headers: { 'Content-Type': 'text/plain' },
+                mode: 'no-cors'
             });
             // Con Google Apps script, el redirect POST retorna algo.
             return { status: 'success' };
@@ -51,7 +52,8 @@ class SERFOVER_API {
             const response = await fetch(GOOGLE_SHEETS_URL, {
                 method: 'POST',
                 body: JSON.stringify({ action: 'delete', type: type, rowId: rowId }),
-                headers: { 'Content-Type': 'text/plain' }
+                headers: { 'Content-Type': 'text/plain' },
+                mode: 'no-cors'
             });
             return { status: 'success' };
         } catch (error) {

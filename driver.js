@@ -57,7 +57,8 @@ function getBase64(file) {
 function updateTotal() {
     const peaje = parseFloat(document.getElementById('repPeaje').value) || 0;
     const romana = parseFloat(document.getElementById('repRomana').value) || 0;
-    document.getElementById('repTotal').value = peaje + romana;
+    const viatico = parseFloat(document.getElementById('repViatico').value) || 0;
+    document.getElementById('repTotal').value = peaje + romana + viatico;
 }
 
 // --- Modal ---
@@ -152,6 +153,12 @@ async function loadDriverHistory() {
         }
         misMantenciones.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
         window.currentDriverMants = misMantenciones;
+
+        const elStatViajes = document.getElementById('driverStatViajes');
+        if (elStatViajes) elStatViajes.textContent = misReportes.length;
+
+        const elStatMant = document.getElementById('driverStatMant');
+        if (elStatMant) elStatMant.textContent = misMantenciones.length;
 
         const tbodyMant = document.querySelector('#tableDriverMantenciones tbody');
         if (tbodyMant) {

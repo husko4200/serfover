@@ -176,6 +176,9 @@ async function loadMechanicData() {
         misMantenciones.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
         window.currentMants = misMantenciones;
 
+        const elStatMant = document.getElementById('mechStatMant');
+        if (elStatMant) elStatMant.textContent = misMantenciones.length;
+
         const tbody = document.querySelector('#tableHistorial tbody');
         tbody.innerHTML = '';
 

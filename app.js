@@ -1,4 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Theme Management
+    let pageContext = 'app';
+    if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('serfoverweb/') || window.location.pathname === '/') {
+        pageContext = 'login';
+    }
+
+    const savedTheme = localStorage.getItem(`serfover_theme_${pageContext}`) || (pageContext === 'login' ? 'light' : 'dark');
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    
+    window.toggleTheme = function() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem(`serfover_theme_${pageContext}`, newTheme);
+    };
+
     const loginForm = document.getElementById('loginForm');
     const loginError = document.getElementById('loginError');
 
@@ -10,14 +26,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const password = document.getElementById('password').value;
             
             // Simulación de autenticación (posteriormente se podría conectar con Vercel/Google Sheets API si se requiere validación real)
-            if (username === 'dueno' && password === '123') {
-                localStorage.setItem('serfover_user', JSON.stringify({ role: 'owner', name: 'Dueño SERFOVER' }));
+            const usernameLower = username.toLowerCase().trim();
+            if (usernameLower === 'alex' && password === 'alex2026') {
+                localStorage.setItem('serfover_user', JSON.stringify({ role: 'owner', name: 'Alex' }));
                 window.location.href = 'dashboard.html';
-            } else if (username === 'conductor' && password === '123') {
-                localStorage.setItem('serfover_user', JSON.stringify({ role: 'driver', name: 'Conductor Prueba' }));
+            } else if (usernameLower === 'camilo' && password === 'camilo2026') {
+                localStorage.setItem('serfover_user', JSON.stringify({ role: 'driver', name: 'Camilo Vergara' }));
                 window.location.href = 'driver.html';
-            } else if (username === 'mecanico' && password === '123') {
-                localStorage.setItem('serfover_user', JSON.stringify({ role: 'mechanic', name: 'Mecánico Jefe' }));
+            } else if (usernameLower === 'eladio' && password === 'eladio2020') {
+                localStorage.setItem('serfover_user', JSON.stringify({ role: 'driver', name: 'Eladio Alvarez' }));
+                window.location.href = 'driver.html';
+            } else if (usernameLower === 'deivid' && password === 'deivid2010') {
+                localStorage.setItem('serfover_user', JSON.stringify({ role: 'mechanic', name: 'Deivid Alexis' }));
                 window.location.href = 'mechanic.html';
             } else {
                 loginError.style.display = 'block';

@@ -253,13 +253,16 @@ async function loadData() {
             mantenciones: filteredMant
         };
 
-        let totalGastos = 0;
+        let totalCombustible = 0;
+        let totalMantencion = 0;
+        let totalOtrosGastos = 0;
         let totalViajes = filteredReportes.length;
 
         // --- Render Reportes ---
         const tbodyRep = document.querySelector('#tableReportes tbody');
         tbodyRep.innerHTML = '';
         filteredReportes.forEach((rep, i) => {
+            totalOtrosGastos += Number(rep.peaje || 0) + Number(rep.romana || 0) + Number(rep.viatico || 0) + Number(rep.total || 0);
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td data-label="Fecha">${formatDate(rep.fecha)}</td>
@@ -276,7 +279,7 @@ async function loadData() {
         const tbodyComb = document.querySelector('#tableCombustible tbody');
         tbodyComb.innerHTML = '';
         filteredComb.forEach((comb, i) => {
-            totalGastos += Number(comb.valor || 0);
+            totalCombustible += Number(comb.valor || 0);
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td data-label="Fecha">${formatDate(comb.fecha)}</td>
@@ -294,7 +297,7 @@ async function loadData() {
         const tbodyMant = document.querySelector('#tableMantencion tbody');
         tbodyMant.innerHTML = '';
         filteredMant.forEach((mant, i) => {
-            totalGastos += Number(mant.valor || 0);
+            totalMantencion += Number(mant.valor || 0);
             
             let origen = "Conductor";
             let origenColor = "var(--brand-secondary)";
@@ -318,7 +321,9 @@ async function loadData() {
 
         // --- Update Stats ---
         document.getElementById('statViajes').textContent = totalViajes;
-        document.getElementById('statGastos').textContent = formatMoney(totalGastos);
+        document.getElementById('statCombustible').textContent = formatMoney(totalCombustible);
+        document.getElementById('statMantencion').textContent = formatMoney(totalMantencion);
+        document.getElementById('statOtrosGastos').textContent = formatMoney(totalOtrosGastos);
 
     } catch (error) {
         console.error('Error cargando datos', error);
@@ -425,20 +430,87 @@ window.verMantencion = function(index) {
     openModal('Detalle Mantención', html);
 };
 
-window.deleteRecord = async function(type, id) {
-    if (confirm("¿Estás seguro de que quieres eliminar este registro de la base de datos de forma permanente?")) {
+window.showToast = function(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    const isError = type === 'error';
+    toast.style.background = isError ? 'rgba(239, 68, 68, 0.95)' : 'rgba(16, 185, 129, 0.95)';
+    toast.style.color = 'white';
+    toast.style.padding = '1rem 1.5rem';
+    toast.style.borderRadius = 'var(--radius-md)';
+    toast.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.3)';
+    toast.style.display = 'flex';
+    toast.style.alignItems = 'center';
+    toast.style.gap = '0.75rem';
+    toast.style.fontWeight = '500';
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(20px)';
+    toast.style.transition = 'all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+    
+    const icon = isError ? 
+        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>' :
+        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>';
+
+    toast.innerHTML = icon + '<span>' + message + '</span>';
+    container.appendChild(toast);
+
+    // Animate in
+    setTimeout(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+    }, 10);
+
+    // Animate out and remove
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(-20px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+};
+
+window.customConfirm = function(message, onConfirm) {
+    const modal = document.getElementById('confirmModal');
+    if (!modal) {
+        if (confirm(message)) onConfirm();
+        return;
+    }
+    
+    document.getElementById('confirmMessage').textContent = message;
+    modal.classList.add('active');
+    
+    const confirmBtn = document.getElementById('confirmActionBtn');
+    
+    // Remover eventos anteriores
+    const newBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+    
+    newBtn.addEventListener('click', () => {
+        closeConfirmModal();
+        onConfirm();
+    });
+};
+
+window.closeConfirmModal = function() {
+    const modal = document.getElementById('confirmModal');
+    if (modal) modal.classList.remove('active');
+};
+
+window.deleteRecord = function(type, id) {
+    customConfirm("¿Estás seguro de que quieres eliminar este registro de forma permanente?", async () => {
         const btn = document.querySelector('#detailModal .btn');
         if (btn) btn.textContent = "Eliminando...";
         try {
             await API.deleteData(type, id);
-            alert("Registro eliminado exitosamente.");
+            showToast("Registro eliminado exitosamente.");
             closeModal();
             loadData(); // Recargar datos
         } catch (e) {
-            alert("Hubo un error al eliminar. Inténtalo de nuevo.");
+            showToast("Hubo un error al eliminar. Inténtalo de nuevo.", "error");
             if (btn) btn.textContent = "🗑️ Eliminar";
         }
-    }
+    });
 };
 
 document.addEventListener('DOMContentLoaded', () => {

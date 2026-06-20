@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Conductor - SERFOVER</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=5">
     <style>
         .tabs {
             display: flex;
@@ -100,6 +100,9 @@
                 <h2 class="page-title" id="pageTitle">Hoja de Ruta</h2>
                 <div style="display: flex; align-items: center; gap: 1rem;">
                     <div class="date-display" id="currentDate" style="display: none;"></div>
+                    <button class="btn-icon" onclick="toggleTheme()" aria-label="Toggle Theme">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    </button>
                     <button id="logoutBtnMobile" class="btn-icon mobile-logout" onclick="document.getElementById('logoutBtn').click()">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                     </button>
@@ -116,6 +119,27 @@
                         </div>
                         <div style="padding: 1.5rem;">
                             <p style="color: var(--text-secondary); margin-bottom: 2rem;">¿Qué deseas hacer hoy?</p>
+                            
+                            <div class="stats-grid" style="margin-bottom: 2rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="color: var(--brand-secondary); background-color: rgba(37,99,235,0.1);">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                                    </div>
+                                    <div class="stat-info">
+                                        <h3 id="driverStatViajes">0</h3>
+                                        <p>Mis Viajes (Mes)</p>
+                                    </div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="color: var(--accent-warning); background-color: rgba(245, 158, 11, 0.1);">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                                    </div>
+                                    <div class="stat-info">
+                                        <h3 id="driverStatMant">0</h3>
+                                        <p>Mis Mantenciones (Mes)</p>
+                                    </div>
+                                </div>
+                            </div>
                             
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
                                 <button onclick="switchTab('reporte')" class="btn btn-secondary" style="height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
@@ -194,7 +218,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Viático</label>
-                                <input type="number" id="repViatico">
+                                <input type="number" id="repViatico" oninput="updateTotal()">
                             </div>
                             <div class="form-group">
                                 <label>Total</label>
@@ -392,8 +416,8 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
-    <script src="api.js"></script>
-    <script src="driver.js?v=5"></script>
+    <script src="app.js?v=6"></script>
+    <script src="api.js?v=3"></script>
+    <script src="driver.js?v=7"></script>
 </body>
 </html>
