@@ -182,11 +182,44 @@ async function loadData() {
 
             let hasAlerts = false;
 
-            // 1. Alertas de Aceite
+            // 1. Alertas de Aceite y Actividad
+            const today = new Date();
+            const threeDaysAgo = new Date(today);
+            threeDaysAgo.setDate(today.getDate() - 3);
+
+            // Set para buscar inactividad
+            const activeDrivers = new Set();
+            if (filteredReportes) {
+                filteredReportes.forEach(r => {
+                    const rDate = new Date(r.fecha);
+                    if (rDate >= threeDaysAgo) {
+                        activeDrivers.add(r.driver);
+                    }
+                });
+            }
+
+            // Alerta de inactividad de conductores
+            const allDrivers = new Set(Object.values(fleetMap).map(t => t.driver));
+            allDrivers.forEach(d => {
+                if (!d || d === 'Dueño' || d.startsWith('Mecánico') || d === 'Mecanico') return;
+                if (!activeDrivers.has(d)) {
+                    hasAlerts = true;
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert-box';
+                    alertDiv.style.padding = '1rem';
+                    alertDiv.style.borderRadius = 'var(--radius-md)';
+                    alertDiv.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                    alertDiv.style.color = 'var(--accent-danger)';
+                    alertDiv.style.border = '1px solid var(--accent-danger)';
+                    alertDiv.innerHTML = `⚠️ ATENCIÓN - El conductor <strong>${d}</strong> no ha subido reportes en los últimos 3 días.`;
+                    alertsContainer.appendChild(alertDiv);
+                }
+            });
+
             Object.values(fleetMap).forEach(truck => {
                 if (truck.lastOilKm > 0) {
                     const diff = truck.maxKm - truck.lastOilKm;
-                    if (diff >= 35000) {
+                    if (diff >= 14000) {
                         hasAlerts = true;
                         const alertDiv = document.createElement('div');
                         alertDiv.className = 'alert-box';
@@ -194,16 +227,16 @@ async function loadData() {
                         alertDiv.style.borderRadius = 'var(--radius-md)';
                         alertDiv.style.fontWeight = 'bold';
                         
-                        if (diff >= 40000) {
+                        if (diff >= 15000) {
                             alertDiv.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
                             alertDiv.style.color = 'var(--accent-danger)';
                             alertDiv.style.border = '1px solid var(--accent-danger)';
-                            alertDiv.innerHTML = `🚨 URGENTE - Camión <strong>${truck.movil}</strong>: Han pasado ${diff.toLocaleString('es-CL')} km desde el último cambio de aceite (Límite 40.000).`;
+                            alertDiv.innerHTML = `🚨 URGENTE - Camión <strong>${truck.movil}</strong>: Han pasado ${diff.toLocaleString('es-CL')} km desde el último cambio de aceite (Límite 15.000).`;
                         } else {
                             alertDiv.style.backgroundColor = 'rgba(245, 158, 11, 0.1)';
                             alertDiv.style.color = 'var(--accent-warning)';
                             alertDiv.style.border = '1px solid var(--accent-warning)';
-                            alertDiv.innerHTML = `⚠️ AVISO - Camión <strong>${truck.movil}</strong>: Han pasado ${diff.toLocaleString('es-CL')} km desde el último cambio de aceite. Prepárese para cambio a los 40.000 km.`;
+                            alertDiv.innerHTML = `⚠️ AVISO - Camión <strong>${truck.movil}</strong>: Han pasado ${diff.toLocaleString('es-CL')} km desde el último cambio de aceite. Prepárese para cambio a los 15.000 km.`;
                         }
                         alertsContainer.appendChild(alertDiv);
                     }
@@ -253,77 +286,245 @@ async function loadData() {
             mantenciones: filteredMant
         };
 
-        let totalCombustible = 0;
-        let totalMantencion = 0;
-        let totalOtrosGastos = 0;
-        let totalViajes = filteredReportes.length;
-
         // --- Render Reportes ---
         const tbodyRep = document.querySelector('#tableReportes tbody');
-        tbodyRep.innerHTML = '';
-        filteredReportes.forEach((rep, i) => {
-            totalOtrosGastos += Number(rep.peaje || 0) + Number(rep.romana || 0) + Number(rep.viatico || 0) + Number(rep.total || 0);
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td data-label="Fecha">${formatDate(rep.fecha)}</td>
-                <td data-label="Conductor"><span class="driver-badge">${rep.driver}</span></td>
-                <td data-label="Móvil"><strong>${rep._movil}</strong></td>
-                <td data-label="Destino">${rep.fundo} / ${rep.destino}</td>
-                <td data-label="N° Guía">${rep.guia || '-'}</td>
-                <td data-label="Acción"><button class="view-btn" onclick="verReporte(${i})">Ver</button></td>
-            `;
-            tbodyRep.appendChild(tr);
-        });
+        if (tbodyRep) {
+            tbodyRep.innerHTML = '';
+            filteredReportes.forEach((rep, i) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td data-label="Fecha">${formatDate(rep.fecha)}</td>
+                    <td data-label="Conductor"><span class="driver-badge">${rep.driver}</span></td>
+                    <td data-label="Móvil"><strong>${rep._movil}</strong></td>
+                    <td data-label="Destino">${rep.fundo} / ${rep.destino}</td>
+                    <td data-label="N° Guía">${rep.guia || '-'}</td>
+                    <td data-label="Acción"><button class="view-btn" onclick="verReporte(${i})">Ver</button></td>
+                `;
+                tbodyRep.appendChild(tr);
+            });
+        }
 
         // --- Render Combustible ---
         const tbodyComb = document.querySelector('#tableCombustible tbody');
-        tbodyComb.innerHTML = '';
-        filteredComb.forEach((comb, i) => {
-            totalCombustible += Number(comb.valor || 0);
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td data-label="Fecha">${formatDate(comb.fecha)}</td>
-                <td data-label="Conductor"><span class="driver-badge">${comb.driver}</span></td>
-                <td data-label="Móvil"><strong>${comb._movil}</strong></td>
-                <td data-label="Litros">${comb.litros} L</td>
-                <td data-label="Kilometraje">${comb.kilometraje} km</td>
-                <td data-label="Costo"><span style="color:var(--accent-danger);">${formatMoney(comb.valor)}</span></td>
-                <td data-label="Acción"><button class="view-btn" onclick="verCombustible(${i})">Ver</button></td>
-            `;
-            tbodyComb.appendChild(tr);
-        });
+        if (tbodyComb) {
+            tbodyComb.innerHTML = '';
+            filteredComb.forEach((comb, i) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td data-label="Fecha">${formatDate(comb.fecha)}</td>
+                    <td data-label="Conductor"><span class="driver-badge">${comb.driver}</span></td>
+                    <td data-label="Móvil"><strong>${comb._movil}</strong></td>
+                    <td data-label="Litros">${comb.litros} L</td>
+                    <td data-label="Kilometraje">${comb.kilometraje} km</td>
+                    <td data-label="Costo"><span style="color:var(--accent-danger);">${formatMoney(comb.valor)}</span></td>
+                    <td data-label="Acción"><button class="view-btn" onclick="verCombustible(${i})">Ver</button></td>
+                `;
+                tbodyComb.appendChild(tr);
+            });
+        }
 
         // --- Render Mantenciones ---
         const tbodyMant = document.querySelector('#tableMantencion tbody');
-        tbodyMant.innerHTML = '';
-        filteredMant.forEach((mant, i) => {
-            totalMantencion += Number(mant.valor || 0);
-            
-            let origen = "Conductor";
-            let origenColor = "var(--brand-secondary)";
-            if (mant.driver && mant.driver.startsWith("Mecánico")) {
-                origen = "Mecánico";
-                origenColor = "var(--brand-primary)";
-            }
+        if (tbodyMant) {
+            tbodyMant.innerHTML = '';
+            filteredMant.forEach((mant, i) => {
+                let origen = "Conductor";
+                let origenColor = "var(--brand-secondary)";
+                if ((mant.driver && mant.driver.startsWith("Mecánico")) || (mant.descripcion && mant.descripcion.includes('Móvil:'))) {
+                    origen = "Mecánico";
+                    origenColor = "var(--brand-primary)";
+                }
 
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td data-label="Fecha">${formatDate(mant.fecha)}</td>
-                <td data-label="Conductor"><span class="driver-badge">${mant.driver}</span></td>
-                <td data-label="Móvil"><strong>${mant._movil}</strong></td>
-                <td data-label="Origen"><span style="color: ${origenColor}; font-weight: bold; font-size: 0.8rem; border: 1px solid ${origenColor}; padding: 0.2rem 0.4rem; border-radius: 4px;">${origen}</span></td>
-                <td data-label="Descripción">${mant.descripcion.substring(0, 40)}...</td>
-                <td data-label="Costo"><span style="color:var(--accent-danger);">${formatMoney(mant.valor)}</span></td>
-                <td data-label="Acción"><button class="view-btn" onclick="verMantencion(${i})">Ver</button></td>
-            `;
-            tbodyMant.appendChild(tr);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td data-label="Fecha">${formatDate(mant.fecha)}</td>
+                    <td data-label="Conductor"><span class="driver-badge">${mant.driver}</span></td>
+                    <td data-label="Móvil"><strong>${mant._movil}</strong></td>
+                    <td data-label="Origen"><span style="color: ${origenColor}; font-weight: bold; font-size: 0.8rem; border: 1px solid ${origenColor}; padding: 0.2rem 0.4rem; border-radius: 4px;">${origen}</span></td>
+                    <td data-label="Descripción">${mant.descripcion.substring(0, 40)}...</td>
+                    <td data-label="Costo"><span style="color:var(--accent-danger);">${formatMoney(mant.valor)}</span></td>
+                    <td data-label="Acción"><button class="view-btn" onclick="verMantencion(${i})">Ver</button></td>
+                `;
+                tbodyMant.appendChild(tr);
+            });
+        }
+
+        // --- Update Stats and Calculate Trends ---
+        const now = new Date();
+        const currentMonthNum = now.getMonth();
+        const prevMonthNum = currentMonthNum === 0 ? 11 : currentMonthNum - 1;
+
+        let totalCombustible = 0, prevCombustible = 0;
+        let totalMantencion = 0, prevMantencion = 0;
+        let totalOtrosGastos = 0, prevOtrosGastos = 0;
+        let totalViajes = 0, prevViajes = 0;
+        let totalCantMant = 0, prevCantMant = 0;
+
+        let truckFuelMap = {};
+        let truckTripsMap = {};
+        let driverTripsMap = {};
+
+        filteredReportes.forEach(rep => {
+            const d = new Date(rep.fecha);
+            if (d.getMonth() === currentMonthNum) {
+                totalOtrosGastos += Number(rep.peaje || 0) + Number(rep.romana || 0) + Number(rep.viatico || 0) + Number(rep.total || 0);
+                totalViajes++;
+                // Ranking vars
+                truckTripsMap[rep._movil] = (truckTripsMap[rep._movil] || 0) + 1;
+                driverTripsMap[rep.driver] = (driverTripsMap[rep.driver] || 0) + 1;
+            } else if (d.getMonth() === prevMonthNum) {
+                prevOtrosGastos += Number(rep.peaje || 0) + Number(rep.romana || 0) + Number(rep.viatico || 0) + Number(rep.total || 0);
+                prevViajes++;
+            }
         });
 
-        // --- Update Stats ---
+        filteredComb.forEach(comb => {
+            const d = new Date(comb.fecha);
+            if (d.getMonth() === currentMonthNum) {
+                totalCombustible += Number(comb.valor || 0);
+                truckFuelMap[comb._movil] = (truckFuelMap[comb._movil] || 0) + Number(comb.valor || 0);
+            } else if (d.getMonth() === prevMonthNum) {
+                prevCombustible += Number(comb.valor || 0);
+            }
+        });
+
+        filteredMant.forEach(mant => {
+            const d = new Date(mant.fecha);
+            if (d.getMonth() === currentMonthNum) {
+                totalMantencion += Number(mant.valor || 0);
+                totalCantMant++;
+            } else if (d.getMonth() === prevMonthNum) {
+                prevMantencion += Number(mant.valor || 0);
+                prevCantMant++;
+            }
+        });
+
+        // Function to set trend HTML
+        const setTrend = (elId, current, prev, inverse = false) => {
+            const el = document.getElementById(elId);
+            if(!el) return;
+            if (prev === 0) { el.textContent = 'Sin datos previos'; return; }
+            const diff = current - prev;
+            const percent = Math.round((Math.abs(diff) / prev) * 100);
+            if (diff > 0) {
+                el.innerHTML = `<span style="color: ${inverse ? 'var(--accent-danger)' : 'var(--brand-primary)'}; font-weight: bold;">🔼 ${percent}%</span> más que el mes pasado`;
+            } else if (diff < 0) {
+                el.innerHTML = `<span style="color: ${inverse ? 'var(--brand-primary)' : 'var(--accent-danger)'}; font-weight: bold;">🔻 ${percent}%</span> menos que el mes pasado`;
+            } else {
+                el.textContent = 'Igual al mes pasado';
+            }
+        };
+
         document.getElementById('statViajes').textContent = totalViajes;
+        setTrend('trendViajes', totalViajes, prevViajes, false);
+
+        if (document.getElementById('statCantMantenciones')) {
+            document.getElementById('statCantMantenciones').textContent = totalCantMant;
+            setTrend('trendCantMant', totalCantMant, prevCantMant, false);
+        }
+
         document.getElementById('statCombustible').textContent = formatMoney(totalCombustible);
+        setTrend('trendCombustible', totalCombustible, prevCombustible, true);
+
         document.getElementById('statMantencion').textContent = formatMoney(totalMantencion);
+        setTrend('trendMantencion', totalMantencion, prevMantencion, true);
+
         document.getElementById('statOtrosGastos').textContent = formatMoney(totalOtrosGastos);
+        setTrend('trendOtros', totalOtrosGastos, prevOtrosGastos, true);
+
+        // --- Render Rankings ---
+        const topFuelTruck = Object.entries(truckFuelMap).sort((a, b) => b[1] - a[1])[0];
+        if (topFuelTruck && document.getElementById('rankTopFuelTruck')) {
+            document.getElementById('rankTopFuelTruck').textContent = topFuelTruck[0];
+            document.getElementById('rankTopFuelValue').textContent = formatMoney(topFuelTruck[1]) + ' gastados';
+        }
+
+        const topTripsTruck = Object.entries(truckTripsMap).sort((a, b) => b[1] - a[1])[0];
+        if (topTripsTruck && document.getElementById('rankMostTripsTruck')) {
+            document.getElementById('rankMostTripsTruck').textContent = topTripsTruck[0];
+            document.getElementById('rankMostTripsValue').textContent = topTripsTruck[1] + ' viajes';
+        }
+
+        const topDriver = Object.entries(driverTripsMap).sort((a, b) => b[1] - a[1])[0];
+        if (topDriver && document.getElementById('rankTopDriver')) {
+            document.getElementById('rankTopDriver').textContent = topDriver[0];
+            document.getElementById('rankTopDriverValue').textContent = topDriver[1] + ' viajes';
+        }
+
+        // --- Render Charts (Chart.js) ---
+        if (window.myExpensesChart) window.myExpensesChart.destroy();
+        const ctxEx = document.getElementById('expensesChart');
+        if (ctxEx) {
+            const hasData = (totalCombustible + totalMantencion + totalOtrosGastos) > 0;
+            const cData = hasData ? [totalCombustible, totalMantencion, totalOtrosGastos] : [1];
+            const cLabels = hasData ? ['Combustible', 'Mantenciones', 'Otros Gastos'] : ['Sin Gastos Este Mes'];
+            const cColors = hasData ? ['#ef4444', '#f59e0b', '#10b981'] : ['#e2e8f0'];
+
+            window.myExpensesChart = new Chart(ctxEx, {
+                type: 'doughnut',
+                data: {
+                    labels: cLabels,
+                    datasets: [{
+                        data: cData,
+                        backgroundColor: cColors,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: 'right', labels: { color: getComputedStyle(document.body).getPropertyValue('--text-primary') } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (!hasData) return ' $0';
+                                    let label = context.label || '';
+                                    if (label) label += ': ';
+                                    label += formatMoney(context.raw);
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Trips Chart (Last 6 months)
+        if (window.myTripsChart) window.myTripsChart.destroy();
+        const ctxTrips = document.getElementById('tripsChart');
+        if (ctxTrips) {
+            const monthsLabel = [];
+            const tripsData = [];
+            for (let i = 5; i >= 0; i--) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                monthsLabel.push(d.toLocaleDateString('es-CL', { month: 'short' }));
+                const monthTrips = filteredReportes.filter(r => new Date(r.fecha).getMonth() === d.getMonth() && new Date(r.fecha).getFullYear() === d.getFullYear()).length;
+                tripsData.push(monthTrips);
+            }
+            window.myTripsChart = new Chart(ctxTrips, {
+                type: 'bar',
+                data: {
+                    labels: monthsLabel,
+                    datasets: [{
+                        label: 'Viajes Realizados',
+                        data: tripsData,
+                        backgroundColor: 'rgba(37, 99, 235, 0.8)',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { stepSize: 1, color: getComputedStyle(document.body).getPropertyValue('--text-secondary') } },
+                        x: { ticks: { color: getComputedStyle(document.body).getPropertyValue('--text-secondary') } }
+                    }
+                }
+            });
+        }
 
     } catch (error) {
         console.error('Error cargando datos', error);
@@ -364,8 +565,19 @@ window.verReporte = function(index) {
     }
 
     if (rep.id) {
-        html += `<div style="margin-top: 1.5rem; border-top: 1px solid var(--border-light); padding-top: 1rem; text-align: right;">
+        html += `<div style="margin-top: 1.5rem; border-top: 1px solid var(--border-light); padding-top: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <button onclick="descargarHojaRutaPDF(${index}, true)" class="btn btn-secondary" style="border-color: var(--brand-primary); color: var(--brand-primary); padding: 0.5rem 1rem;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: text-bottom;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Descargar PDF
+            </button>
             <button onclick="deleteRecord('reporte', ${rep.id})" class="btn" style="background-color: var(--accent-danger); color: white; border: none; padding: 0.5rem 1rem; cursor: pointer;">🗑️ Eliminar Reporte</button>
+        </div>`;
+    } else {
+        html += `<div style="margin-top: 1.5rem; border-top: 1px solid var(--border-light); padding-top: 1rem;">
+            <button onclick="descargarHojaRutaPDF(${index}, true)" class="btn btn-secondary" style="border-color: var(--brand-primary); color: var(--brand-primary); padding: 0.5rem 1rem;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: text-bottom;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Descargar PDF
+            </button>
         </div>`;
     }
 
@@ -516,3 +728,85 @@ window.deleteRecord = function(type, id) {
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
 });
+
+window.descargarHojaRutaPDF = function(index, isOwner = true) {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+        showToast("Las librerías PDF no han cargado aún.", "error");
+        return;
+    }
+    
+    // Si isOwner es true, busca en currentData.reportes. Si es false (conductor), busca en window.currentDriverReports (esta lógica se usará en driver.js o aquí si se inyecta)
+    const rep = isOwner ? window.currentData.reportes[index] : window.currentDriverReports[index];
+    if (!rep) return;
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('portrait');
+    
+    // Diseño del ticket / Hoja de Ruta
+    doc.setFontSize(24);
+    doc.setTextColor(16, 185, 129); // Verde primary
+    doc.text("SERFOVER", 105, 20, null, null, "center");
+    
+    doc.setFontSize(16);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Hoja de Ruta de Viaje", 105, 30, null, null, "center");
+    
+    // Separador
+    doc.setDrawColor(200, 200, 200);
+    doc.line(14, 35, 196, 35);
+    
+    // Datos Principales
+    doc.setFontSize(12);
+    doc.setTextColor(60, 60, 60);
+    
+    let currentY = 45;
+    const lineHeight = 8;
+    
+    const addLine = (label, value) => {
+        doc.setFont(undefined, 'bold');
+        doc.text(label + ":", 14, currentY);
+        doc.setFont(undefined, 'normal');
+        doc.text(String(value || '-'), 60, currentY);
+        currentY += lineHeight;
+    };
+    
+    addLine("Fecha", formatDate(rep.fecha));
+    addLine("Conductor", rep.driver);
+    addLine("Móvil", rep._movil || rep.movil);
+    addLine("Kilometraje", rep.kilometraje + " km");
+    
+    currentY += 4;
+    doc.line(14, currentY - 6, 196, currentY - 6);
+    
+    addLine("Origen/Fundo", rep.fundo);
+    addLine("Destino", rep.destino);
+    addLine("Sector Faena", rep.faena);
+    addLine("N° Guía", rep.guia);
+    
+    currentY += 4;
+    doc.line(14, currentY - 6, 196, currentY - 6);
+    
+    addLine("Peaje", formatMoney(rep.peaje || 0));
+    addLine("Romana", formatMoney(rep.romana || 0));
+    addLine("Viático", formatMoney(rep.viatico || 0));
+    addLine("Total Gastos Extras", formatMoney(rep.total || 0));
+    
+    currentY += 4;
+    doc.line(14, currentY - 6, 196, currentY - 6);
+    
+    doc.setFont(undefined, 'bold');
+    doc.text("Observaciones:", 14, currentY);
+    currentY += 6;
+    doc.setFont(undefined, 'normal');
+    
+    // Manejo de observaciones largas
+    const obsLines = doc.splitTextToSize(rep.observaciones || 'Sin observaciones', 180);
+    doc.text(obsLines, 14, currentY);
+    
+    // Pie de página
+    doc.setFontSize(9);
+    doc.setTextColor(150, 150, 150);
+    doc.text("Documento generado automáticamente por el sistema SERFOVER", 105, 280, null, null, "center");
+
+    doc.save(`Hoja_de_Ruta_${rep.movil}_${new Date(rep.fecha).toLocaleDateString('es-CL').replace(/\//g, '-')}.pdf`);
+};

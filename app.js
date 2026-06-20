@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pageContext = 'login';
     }
 
-    const savedTheme = localStorage.getItem(`serfover_theme_${pageContext}`) || (pageContext === 'login' ? 'light' : 'dark');
+    const savedTheme = pageContext === 'login' ? 'light' : (localStorage.getItem(`serfover_theme_${pageContext}`) || 'dark');
     document.documentElement.setAttribute('data-theme', savedTheme);
     
     window.toggleTheme = function() {

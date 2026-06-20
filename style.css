@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
     /* Colors - Premium Dark/Forest Theme */
@@ -64,7 +64,7 @@
 
 :root {
     /* Typography */
-    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
     
     /* Spacing & Sizes */
     --radius-sm: 0.5rem;
@@ -73,12 +73,12 @@
     --radius-xl: 1.5rem;
     
     /* Shadows */
-    --shadow-glass: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
-    --shadow-glow: 0 0 30px rgba(16, 185, 129, 0.2);
-    --shadow-btn: 0 6px 20px -4px rgba(16, 185, 129, 0.5);
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    --shadow-glow: 0 0 20px rgba(16, 185, 129, 0.2);
+    --shadow-btn: 0 4px 14px 0 rgba(16, 185, 129, 0.39);
     
     /* Transitions */
-    --transition-fast: 300ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    --transition-fast: 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
@@ -91,15 +91,13 @@ body {
     font-family: var(--font-family);
     background-color: var(--bg-base);
     background-image: 
-        radial-gradient(circle at 15% 50%, var(--bg-gradient-1) 0%, transparent 40%),
-        radial-gradient(circle at 85% 30%, var(--bg-gradient-2) 0%, transparent 40%);
+        radial-gradient(at 0% 0%, var(--bg-gradient-1) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, var(--bg-gradient-2) 0px, transparent 50%);
     background-attachment: fixed;
     color: var(--text-primary);
-    line-height: 1.6;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
     min-height: 100vh;
-    transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -133,31 +131,28 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--brand-primary), var(--brand-primary-hover));
+    background: linear-gradient(135deg, var(--brand-primary), #047857);
     color: white;
     box-shadow: var(--shadow-btn);
-    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.6);
-    filter: brightness(1.15);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
 }
 
 .btn-primary:active {
-    transform: translateY(1px);
+    transform: translateY(0);
 }
 
 .btn-secondary {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.05);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
-    backdrop-filter: blur(5px);
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255,255,255,0.15);
     transform: translateY(-2px);
     box-shadow: 0 8px 20px -5px rgba(0,0,0,0.2);
@@ -243,42 +238,18 @@ input::placeholder, textarea::placeholder {
     justify-content: center;
     min-height: 100vh;
     padding: 1.5rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.login-body::before {
-    content: '';
-    position: absolute;
-    width: 150vw;
-    height: 150vh;
-    background: radial-gradient(circle at 50% 50%, var(--brand-primary) 0%, transparent 40%);
-    opacity: 0.1;
-    z-index: -1;
-    animation: pulseGlow 15s infinite alternate ease-in-out;
-}
-
-@keyframes pulseGlow {
-    0% { transform: scale(1) translate(0, 0); }
-    100% { transform: scale(1.1) translate(-2%, 2%); }
 }
 
 .login-container {
     width: 100%;
     max-width: 420px;
     margin: auto;
-    position: relative;
-    z-index: 1;
 }
 
 .login-card {
     border-radius: var(--radius-xl);
-    padding: 3.5rem 2.5rem;
-    background: var(--bg-card);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid var(--border-light);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px var(--border-light);
+    padding: 3rem 2rem;
+    box-shadow: var(--shadow-glass);
 }
 
 .login-header {
@@ -454,21 +425,13 @@ input::placeholder, textarea::placeholder {
 
 /* Cards */
 .card {
-    border-radius: var(--radius-xl);
-    padding: 2.5rem;
+    border-radius: var(--radius-lg);
+    padding: 2rem;
     margin-bottom: 2rem;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    box-shadow: var(--shadow-glass);
-    transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
 }
 
 .card:hover {
-    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
-    border-color: rgba(255,255,255,0.1);
-    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 .card-header {
@@ -799,16 +762,14 @@ tbody tr:hover {
         bottom: 0;
         left: 0;
         width: 100%;
-        height: 85px; /* Taller for easier tapping */
+        height: 75px;
         border-right: none;
-        border-top: 1px solid var(--border-light);
+        border-top: 1px solid var(--border-color);
         flex-direction: row;
         z-index: 100;
-        background: var(--bg-card);
+        /* Blur background */
+        background: rgba(15, 23, 42, 0.85);
         backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
-        padding-bottom: env(safe-area-inset-bottom, 10px); /* For iOS home indicator */
     }
     
     .sidebar-header, .sidebar-footer {
@@ -904,7 +865,7 @@ tbody tr:hover {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid rgba(255,255,255,0.05);
         padding: 0.75rem 0.5rem;
         text-align: right;
     }

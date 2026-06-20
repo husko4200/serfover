@@ -67,10 +67,41 @@ function openModal(title, contentHTML) {
     if (!modal) return;
     document.getElementById('modalTitle').textContent = title;
     document.getElementById('modalBody').innerHTML = contentHTML;
-    modal.style.display = 'flex';
+    document.getElementById('detailModal').classList.add('active');
 }
 
-function closeModal() {
+window.verDetalleCombustibleConductor = function(index) {
+    const comb = window.currentDriverCombs[index];
+    if(!comb) return;
+
+    let html = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div><strong>Fecha:</strong> ${formatDate(comb.fecha)}</div>
+            <div><strong>Móvil:</strong> ${comb.movil || '-'}</div>
+            <div><strong>Litros:</strong> ${comb.litros || 0}</div>
+            <div><strong>Valor Total:</strong> $${parseInt(comb.valorTotal || 0).toLocaleString('es-CL')}</div>
+            <div><strong>Kilometraje:</strong> ${comb.kilometraje || '-'}</div>
+        </div>
+        <div style="margin-bottom: 1rem;">
+            <strong>Observaciones:</strong><br>
+            <p style="background: rgba(0,0,0,0.1); padding: 0.5rem; border-radius: var(--radius-sm); margin-top: 0.5rem;">${comb.observaciones || 'Sin observaciones'}</p>
+        </div>
+    `;
+
+    if (comb.imagenUrl && comb.imagenUrl !== '') {
+        html += `
+        <div style="margin-top: 1rem;">
+            <strong>Foto del Vale / Boleta:</strong><br>
+            <img src="${comb.imagenUrl}" alt="Evidencia de Combustible">
+        </div>`;
+    }
+
+    document.getElementById('modalTitle').textContent = 'Detalle de Carga de Combustible';
+    document.getElementById('modalBody').innerHTML = html;
+    document.getElementById('detailModal').classList.add('active');
+}
+
+window.closeModal = function() {
     const modal = document.getElementById('detailModal');
     if (modal) modal.style.display = 'none';
 }
@@ -81,8 +112,86 @@ function formatDate(isoString) {
     return d.toLocaleDateString('es-CL');
 }
 
+window.descargarReporteDriverPDF = function() {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+        showToast("Librerías PDF no cargadas aún.", "error");
+        return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('portrait');
+    
+    doc.setFontSize(20);
+    doc.setTextColor(16, 185, 129);
+    doc.text("SERFOVER", 14, 20);
+    
+    const user = JSON.parse(localStorage.getItem('serfover_user'));
+    
+    doc.setFontSize(14);
+    doc.setTextColor(40, 40, 40);
+    doc.text(`Reporte de Viajes - ${user ? user.name : 'Conductor'}`, 14, 30);
+    
+    const monthFilter = document.getElementById('driverMonthFilter') ? document.getElementById('driverMonthFilter').value : 'Mes Actual';
+    doc.setFontSize(10);
+    doc.text(`Filtro: ${monthFilter}`, 14, 38);
+
+    const reportesData = window.currentDriverReports.map(r => [
+        formatDate(r.fecha),
+        r.movil,
+        r.fundo + ' / ' + r.destino,
+        r.guia || '-'
+    ]);
+
+    doc.autoTable({
+        startY: 45,
+        head: [['Fecha', 'Móvil', 'Trayecto', 'Guía']],
+        body: reportesData,
+        theme: 'grid',
+        headStyles: { fillColor: [15, 23, 42] }
+    });
+
+    doc.save(`Mis_Reportes_${monthFilter}.pdf`);
+};
+
+window.descargarCombustibleDriverPDF = function() {
+    if (!window.jspdf || !window.jspdf.jsPDF) return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('portrait');
+    
+    doc.setFontSize(20);
+    doc.setTextColor(239, 68, 68);
+    doc.text("SERFOVER", 14, 20);
+    
+    const user = JSON.parse(localStorage.getItem('serfover_user'));
+    
+    doc.setFontSize(14);
+    doc.setTextColor(40, 40, 40);
+    doc.text(`Reporte de Combustibles - ${user ? user.name : 'Conductor'}`, 14, 30);
+    
+    const monthFilter = document.getElementById('driverCombMonthFilter') ? document.getElementById('driverCombMonthFilter').value : 'Mes Actual';
+    doc.setFontSize(10);
+    doc.text(`Filtro: ${monthFilter}`, 14, 38);
+
+    const combData = window.currentDriverCombs.map(c => [
+        formatDate(c.fecha),
+        c.movil || '-',
+        c.litros || 0,
+        '$' + parseInt(c.valorTotal || 0).toLocaleString('es-CL')
+    ]);
+
+    doc.autoTable({
+        startY: 45,
+        head: [['Fecha', 'Móvil', 'Litros', 'Total ($)']],
+        body: combData,
+        theme: 'grid',
+        headStyles: { fillColor: [15, 23, 42] }
+    });
+
+    doc.save(`Mis_Combustibles_${monthFilter}.pdf`);
+};
+
 window.currentDriverReports = [];
 window.currentDriverMants = [];
+window.currentDriverCombs = [];
 
 function getMovilFromDesc(desc) {
     if(!desc) return null;
@@ -95,8 +204,9 @@ async function loadDriverHistory() {
         const data = await API.getData();
         if (!data) return;
 
-        const monthVal = document.getElementById('driverMonthFilter').value; 
-        const mantMonthVal = document.getElementById('driverMantMonthFilter') ? document.getElementById('driverMantMonthFilter').value : monthVal;
+        const monthVal = document.getElementById('driverMonthFilter') ? document.getElementById('driverMonthFilter').value : '';
+        const mantMonthVal = document.getElementById('driverMantMonthFilter') ? document.getElementById('driverMantMonthFilter').value : '';
+        const combMonthVal = document.getElementById('driverCombMonthFilter') ? document.getElementById('driverCombMonthFilter').value : '';
         
         const user = JSON.parse(localStorage.getItem('serfover_user'));
         if (!user) return;
@@ -168,7 +278,7 @@ async function loadDriverHistory() {
             } else {
                 misMantenciones.forEach((mant, i) => {
                     const tr = document.createElement('tr');
-                    const isMechanic = mant.driver.startsWith('Mecánico');
+                    const isMechanic = (mant.driver && mant.driver.startsWith('Mecánico')) || (mant.descripcion && mant.descripcion.includes('Móvil:'));
                     const badge = isMechanic ? 
                         '<span style="background: var(--brand-primary); color:white; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.7rem;">Mecánico</span>' : 
                         '<span style="background: var(--bg-hover); color: var(--text-primary); padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.7rem;">Conductor</span>';
@@ -185,6 +295,114 @@ async function loadDriverHistory() {
             }
         }
 
+        // --- Historial de Combustibles ---
+        let misCombustibles = (data.combustibles || []).filter(c => c.driver === user.name);
+        
+        if (combMonthVal) {
+            const [year, month] = combMonthVal.split('-');
+            misCombustibles = misCombustibles.filter(c => {
+                const d = new Date(c.fecha);
+                return d.getFullYear() === parseInt(year) && (d.getMonth() + 1) === parseInt(month);
+            });
+        }
+        misCombustibles.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+        window.currentDriverCombs = misCombustibles;
+
+        const tbodyComb = document.querySelector('#tableDriverCombustibles tbody');
+        if (tbodyComb) {
+            tbodyComb.innerHTML = '';
+            if (misCombustibles.length === 0) {
+                tbodyComb.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 2rem;">No hay cargas de combustible en este mes.</td></tr>';
+            } else {
+                misCombustibles.forEach((comb, i) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td data-label="Fecha">${formatDate(comb.fecha)}</td>
+                        <td data-label="Móvil"><strong>${comb.movil || '-'}</strong></td>
+                        <td data-label="Litros">${comb.litros || 0}</td>
+                        <td data-label="Valor Total">$${parseInt(comb.valorTotal || 0).toLocaleString('es-CL')}</td>
+                        <td data-label="Acción"><button class="view-btn" style="background:transparent; border:1px solid #ef4444; color:#ef4444; padding:0.2rem 0.5rem; border-radius:4px; cursor:pointer;" onclick="verDetalleCombustibleConductor(${i})">Ver</button></td>
+                    `;
+                    tbodyComb.appendChild(tr);
+                });
+            }
+        }
+        let totalComb = 0;
+        misCombustibles.forEach(c => {
+            totalComb += parseFloat(c.valorTotal || c.valor || 0);
+        });
+
+        let totalMant = 0;
+        misMantenciones.forEach(m => {
+            totalMant += parseFloat(m.valor || 0);
+        });
+
+        const elComb = document.getElementById('driverStatGastoComb');
+        if (elComb) elComb.textContent = '$' + totalComb.toLocaleString('es-CL');
+
+        const elMant = document.getElementById('driverStatGastoMant');
+        if (elMant) elMant.textContent = '$' + totalMant.toLocaleString('es-CL');
+
+        let totalKm = 0;
+        misReportes.forEach(rep => {
+            const kmIni = parseInt(rep.kmInicio) || 0;
+            const kmFin = parseInt(rep.kmTermino) || 0;
+            if (kmFin > kmIni) totalKm += (kmFin - kmIni);
+        });
+        const elKm = document.getElementById('driverStatKmTotales');
+        if (elKm) elKm.textContent = totalKm.toLocaleString('es-CL') + ' km';
+
+        // Alertas de cambio de aceite para el móvil asignado
+        if (miMovil) {
+            let maxKm = 0;
+            let lastOilKm = 0;
+            
+            const allRecords = [...(data.reportes||[]), ...(data.combustibles||[]), ...(data.mantenciones||[])];
+            allRecords.forEach(r => {
+                let m = getMovilFromDesc(r.descripcion) || r.movil || r._movil || '';
+                if (m.toLowerCase() === miMovil.toLowerCase()) {
+                    let k = parseInt(r.kilometraje || r.kmTermino || 0);
+                    if (k > maxKm) maxKm = k;
+                }
+            });
+            
+            (data.mantenciones||[]).forEach(m => {
+                let mvl = getMovilFromDesc(m.descripcion) || m.movil || m._movil || '';
+                if (mvl.toLowerCase() === miMovil.toLowerCase() && m.tipo === 'Cambio de Aceite') {
+                    let k = parseInt(m.kilometraje || 0);
+                    if (k > lastOilKm) lastOilKm = k;
+                }
+            });
+
+            const alertsContainer = document.getElementById('driverAlertsContainer');
+            if (alertsContainer && lastOilKm > 0) {
+                const diff = maxKm - lastOilKm;
+                if (diff >= 38500) {
+                    alertsContainer.style.display = 'flex';
+                    const alertDiv = document.createElement('div');
+                    alertDiv.style.padding = '1rem';
+                    alertDiv.style.borderRadius = 'var(--radius-md)';
+                    alertDiv.style.fontWeight = 'bold';
+                    
+                    if (diff >= 40000) {
+                        alertDiv.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                        alertDiv.style.color = 'var(--accent-danger)';
+                        alertDiv.style.border = '1px solid var(--accent-danger)';
+                        alertDiv.innerHTML = `🚨 URGENTE: Han pasado ${diff.toLocaleString('es-CL')} km desde el último cambio de aceite (Límite 40.000).`;
+                    } else {
+                        const remaining = 40000 - diff;
+                        alertDiv.style.backgroundColor = 'rgba(245, 158, 11, 0.1)';
+                        alertDiv.style.color = 'var(--accent-warning)';
+                        alertDiv.style.border = '1px solid var(--accent-warning)';
+                        alertDiv.innerHTML = `⚠️ Atención: A tu camión le faltan solo <strong>${remaining.toLocaleString('es-CL')} km</strong> para el cambio de aceite.`;
+                    }
+                    alertsContainer.innerHTML = '';
+                    alertsContainer.appendChild(alertDiv);
+                } else {
+                    alertsContainer.style.display = 'none';
+                }
+            }
+        }
     } catch (error) {
         console.error('Error cargando historiales del conductor', error);
     }
@@ -217,6 +435,13 @@ window.verDetalleReporte = function(index) {
     if (rep.imagen) {
         html += `<strong>Evidencia:</strong><br><img src="${rep.imagen}" alt="Hoja de Ruta" style="max-width:100%; border-radius:var(--radius-md); margin-top:1rem;">`;
     }
+
+    html += `<div style="margin-top: 1.5rem; border-top: 1px solid var(--border-light); padding-top: 1rem;">
+        <button onclick="descargarHojaRutaPDF(${index})" class="btn btn-secondary" style="border-color: var(--brand-primary); color: var(--brand-primary); padding: 0.5rem 1rem; width: 100%;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: text-bottom;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Descargar Hoja de Ruta en PDF
+        </button>
+    </div>`;
 
     openModal('Detalle Mi Reporte', html);
 };
@@ -262,91 +487,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (driverMonthFilter) driverMonthFilter.value = currentMonth;
     const driverMantMonthFilter = document.getElementById('driverMantMonthFilter');
     if (driverMantMonthFilter) driverMantMonthFilter.value = currentMonth;
+    const driverCombMonthFilter = document.getElementById('driverCombMonthFilter');
+    if (driverCombMonthFilter) driverCombMonthFilter.value = currentMonth;
     
     // Cargar historial
     loadDriverHistory();
 
-    // --- Calcular Alertas de Mantención ---
-    async function loadAlerts() {
-        if (!user) return;
-        try {
-            const data = await API.getData();
-            if (!data) return;
-
-            // 1. Encontrar el móvil actual del conductor
-            let misReps = (data.reportes || []).filter(r => r.driver === user.name).sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-            let miMovil = misReps.length > 0 ? misReps[0].movil : null;
-
-            if (!miMovil) return; // No tiene móvil asignado
-
-            let maxKm = 0;
-            // Buscar maxKm para ESTE MÓVIL
-            (data.reportes || []).forEach(r => {
-                if (r.movil && r.movil.toLowerCase() === miMovil.toLowerCase() && parseInt(r.kilometraje) > maxKm) maxKm = parseInt(r.kilometraje);
-            });
-            (data.combustibles || []).forEach(c => {
-                const movilC = getMovilFromDesc(c.descripcion); // combustible a veces no tiene movil a menos que se fuerce, pero en reportes es más seguro. Si el combustible tiene el driver, asumimos que es el del movil.
-                // En combustible actual no guardamos movil explícito salvo que saquemos del driver
-                if (c.driver === user.name && parseInt(c.kilometraje) > maxKm) maxKm = parseInt(c.kilometraje);
-            });
-            (data.mantenciones || []).forEach(m => {
-                const movilM = getMovilFromDesc(m.descripcion);
-                if (movilM && movilM.toLowerCase() === miMovil.toLowerCase() && parseInt(m.kilometraje) > maxKm) maxKm = parseInt(m.kilometraje);
-            });
-
-            // Encontrar último cambio de aceite PARA ESTE MÓVIL
-            let lastOilKm = 0;
-            if (data.mantenciones) {
-                const oilMants = data.mantenciones.filter(m => {
-                    const movilM = getMovilFromDesc(m.descripcion);
-                    const isMyTruck = (movilM && movilM.toLowerCase() === miMovil.toLowerCase()) || (m.driver === user.name);
-                    return isMyTruck && m.tipo === 'Cambio de Aceite';
-                });
-
-                if (oilMants.length > 0) {
-                    oilMants.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-                    lastOilKm = parseInt(oilMants[0].kilometraje) || 0;
-                }
-            }
-
-            const diff = maxKm - lastOilKm;
-            const container = document.getElementById('driverAlertsContainer');
-            if (!container) return;
-
-            container.innerHTML = ''; // Limpiar
-
-            if (diff >= 35000 && diff < 40000) {
-                container.style.display = 'block';
-                container.innerHTML = `
-                    <div style="background-color: rgba(245, 158, 11, 0.1); border-left: 4px solid #f59e0b; padding: 1rem; border-radius: var(--radius-md);">
-                        <div style="display: flex; align-items: center; gap: 0.5rem; color: #f59e0b; font-weight: bold; margin-bottom: 0.5rem;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                            Mantenimiento Preventivo (Móvil: ${miMovil})
-                        </div>
-                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">Tu móvil actual lleva <strong>${diff.toLocaleString('es-CL')} km</strong> desde el último cambio de aceite (Realizado a los ${lastOilKm.toLocaleString('es-CL')} km). Se recomienda programar cambio a los 40.000 km.</p>
-                    </div>
-                `;
-            } else if (diff >= 40000) {
-                container.style.display = 'block';
-                container.innerHTML = `
-                    <div style="background-color: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 1rem; border-radius: var(--radius-md);">
-                        <div style="display: flex; align-items: center; gap: 0.5rem; color: #ef4444; font-weight: bold; margin-bottom: 0.5rem;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-                            ¡CAMBIO DE ACEITE URGENTE! (Móvil: ${miMovil})
-                        </div>
-                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">Tu móvil actual ha superado los 40.000 km desde el último cambio (lleva <strong>${diff.toLocaleString('es-CL')} km</strong>). Comunícate con el mecánico a la brevedad.</p>
-                    </div>
-                `;
-            }
-        } catch (error) {
-            console.error('Error cargando alertas', error);
-        }
-    }
-
-    // Cargar alertas solo si estamos en la vista de conductor (por si acaso este script se reusa)
-    if (document.getElementById('tab-inicio')) {
-        loadAlerts();
-    }
 
     // --- Enviar Reporte ---
     document.getElementById('formReporte').addEventListener('submit', async (e) => {
@@ -450,3 +596,84 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+window.descargarHojaRutaPDF = function(index) {
+    if (!window.jspdf || !window.jspdf.jsPDF) {
+        showToast("Las librerías PDF no han cargado aún.", "error");
+        return;
+    }
+    
+    const rep = window.currentDriverReports[index];
+    if (!rep) return;
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('portrait');
+    
+    // Diseño del ticket / Hoja de Ruta
+    doc.setFontSize(24);
+    doc.setTextColor(16, 185, 129); // Verde primary
+    doc.text("SERFOVER", 105, 20, null, null, "center");
+    
+    doc.setFontSize(16);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Hoja de Ruta de Viaje", 105, 30, null, null, "center");
+    
+    // Separador
+    doc.setDrawColor(200, 200, 200);
+    doc.line(14, 35, 196, 35);
+    
+    // Datos Principales
+    doc.setFontSize(12);
+    doc.setTextColor(60, 60, 60);
+    
+    let currentY = 45;
+    const lineHeight = 8;
+    
+    const addLine = (label, value) => {
+        doc.setFont(undefined, 'bold');
+        doc.text(label + ":", 14, currentY);
+        doc.setFont(undefined, 'normal');
+        doc.text(String(value || '-'), 60, currentY);
+        currentY += lineHeight;
+    };
+    
+    addLine("Fecha", formatDate(rep.fecha));
+    addLine("Conductor", rep.driver || (JSON.parse(localStorage.getItem('serfover_user')) || {}).name || '-');
+    addLine("Móvil", rep.movil || '-');
+    addLine("Kilometraje", rep.kilometraje + " km");
+    
+    currentY += 4;
+    doc.line(14, currentY - 6, 196, currentY - 6);
+    
+    addLine("Origen/Fundo", rep.fundo);
+    addLine("Destino", rep.destino);
+    addLine("Sector Faena", rep.faena);
+    addLine("N° Guía", rep.guia);
+    
+    currentY += 4;
+    doc.line(14, currentY - 6, 196, currentY - 6);
+    
+    addLine("Peaje", formatMoney(rep.peaje || 0));
+    addLine("Romana", formatMoney(rep.romana || 0));
+    addLine("Viático", formatMoney(rep.viatico || 0));
+    addLine("Total Gastos Extras", formatMoney(rep.total || 0));
+    
+    currentY += 4;
+    doc.line(14, currentY - 6, 196, currentY - 6);
+    
+    doc.setFont(undefined, 'bold');
+    doc.text("Observaciones:", 14, currentY);
+    currentY += 6;
+    doc.setFont(undefined, 'normal');
+    
+    // Manejo de observaciones largas
+    const obsLines = doc.splitTextToSize(rep.observaciones || 'Sin observaciones', 180);
+    doc.text(obsLines, 14, currentY);
+    
+    // Pie de página
+    doc.setFontSize(9);
+    doc.setTextColor(150, 150, 150);
+    doc.text("Documento generado automáticamente por el sistema SERFOVER", 105, 280, null, null, "center");
+
+    doc.save(`Hoja_de_Ruta_${rep.movil}_${new Date(rep.fecha).toLocaleDateString('es-CL').replace(/\//g, '-')}.pdf`);
+};

@@ -120,6 +120,16 @@
                                         <p>Mantenciones (Mes)</p>
                                     </div>
                                 </div>
+
+                                <div class="stat-card">
+                                    <div class="stat-icon" style="color: var(--brand-secondary); background-color: rgba(37,99,235,0.1);">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                    </div>
+                                    <div class="stat-info">
+                                        <h3 id="mechStatTopTipo" style="font-size: 1.1rem; line-height: 1.4;">-</h3>
+                                        <p>Servicio Más Frecuente</p>
+                                    </div>
+                                </div>
                             </div>
 
                             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
@@ -146,9 +156,23 @@
                     <div id="mech-historial" class="tab-content">
                         <div class="card-header" style="flex-wrap: wrap; gap: 1rem;">
                             <h3 class="card-title">Historial de Mantenciones Realizadas</h3>
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <label for="monthFilter">Filtrar por Mes:</label>
-                                <input type="month" id="monthFilter" style="padding: 0.3rem 0.5rem; width: auto;" onchange="loadMechanicData()">
+                            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <label for="monthFilter" style="font-size: 0.9rem;">Mes:</label>
+                                    <input type="month" id="monthFilter" class="form-control" style="padding: 0.3rem 0.5rem; width: auto;" onchange="loadMechanicData()">
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <label for="movilFilter" style="font-size: 0.9rem;">Móvil:</label>
+                                    <input type="text" id="movilFilter" class="form-control" placeholder="Ej: PSJk56" style="padding: 0.3rem 0.5rem; width: 120px;" oninput="loadMechanicData()">
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <label for="driverFilter" style="font-size: 0.9rem;">Origen:</label>
+                                    <select id="driverFilter" class="form-control" style="padding: 0.3rem 0.5rem; width: auto;" onchange="loadMechanicData()">
+                                        <option value="">Todos</option>
+                                        <option value="mecanico">Mecánico</option>
+                                        <option value="conductor">Conductor</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         <div class="table-container">
@@ -181,8 +205,12 @@
                                 <input type="text" id="mantMovil" required>
                             </div>
                             <div class="form-group">
-                                <label>Conductor (Opcional)</label>
-                                <input type="text" id="mantConductor">
+                                <label>Conductor a Cargo</label>
+                                <input type="text" id="mantConductor" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Mantención hecha por</label>
+                                <input type="text" id="mantRealizadoPor" value="Mecánico" readonly style="background: var(--bg-hover); color: var(--brand-primary); font-weight: bold; cursor: not-allowed;">
                             </div>
                             <div class="form-group">
                                 <label>Tipo de Mantención</label>
@@ -240,8 +268,8 @@
         </div>
     </div>
 
-    <script src="app.js?v=6"></script>
-    <script src="api.js"></script>
-    <script src="mechanic.js?v=5"></script>
+    <script src="app.js?v=8"></script>
+    <script src="api.js?v=4"></script>
+    <script src="mechanic.js?v=6"></script>
 </body>
 </html>

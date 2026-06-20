@@ -165,6 +165,26 @@ async function loadMechanicData() {
 
         let misMantenciones = data.mantenciones || [];
 
+        // Pre-procesar móvil y origen para filtrado
+        misMantenciones = misMantenciones.map(m => {
+            let movil = 'Desconocido';
+            if (m.descripcion && m.descripcion.includes('Móvil:')) {
+                const match = m.descripcion.match(/Móvil:\s*([^.]+)\./);
+                if (match && match[1]) movil = match[1].trim();
+            } else if (m.movil || m._movil) {
+                movil = m.movil || m._movil;
+            }
+            
+            const driverStr = m.driver || '';
+            const isMech = driverStr.startsWith('Mecánico') || (m.descripcion && m.descripcion.includes('Móvil:'));
+            const origen = isMech ? 'mecanico' : 'conductor';
+
+            return { ...m, _parsedMovil: movil, _parsedOrigen: origen };
+        });
+
+        const movilVal = document.getElementById('movilFilter') ? document.getElementById('movilFilter').value.toLowerCase().trim() : '';
+        const driverVal = document.getElementById('driverFilter') ? document.getElementById('driverFilter').value : '';
+
         if (monthVal) {
             const [year, month] = monthVal.split('-');
             misMantenciones = misMantenciones.filter(m => {
@@ -172,12 +192,46 @@ async function loadMechanicData() {
                 return d.getFullYear() === parseInt(year) && (d.getMonth() + 1) === parseInt(month);
             });
         }
+        
+        if (movilVal) {
+            misMantenciones = misMantenciones.filter(m => m._parsedMovil.toLowerCase().includes(movilVal));
+        }
+
+        if (driverVal) {
+            misMantenciones = misMantenciones.filter(m => m._parsedOrigen === driverVal);
+        }
 
         misMantenciones.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
         window.currentMants = misMantenciones;
 
         const elStatMant = document.getElementById('mechStatMant');
         if (elStatMant) elStatMant.textContent = misMantenciones.length;
+
+        const uniqueTrucks = new Set();
+        const typesCount = {};
+        
+        misMantenciones.forEach(m => {
+            let movil = 'Desconocido';
+            if (m.descripcion && m.descripcion.includes('Móvil:')) {
+                const match = m.descripcion.match(/Móvil:\s*([^.]+)\./);
+                if (match && match[1]) movil = match[1].trim();
+            } else if (m.movil || m._movil) {
+                movil = m.movil || m._movil;
+            }
+            if (movil !== 'Desconocido') uniqueTrucks.add(movil);
+
+            const tipo = m.tipo || 'General/Otros';
+            typesCount[tipo] = (typesCount[tipo] || 0) + 1;
+        });
+
+        const elStatCamiones = document.getElementById('mechStatCamiones');
+        if (elStatCamiones) elStatCamiones.textContent = uniqueTrucks.size;
+
+        const topTipo = Object.entries(typesCount).sort((a,b) => b[1] - a[1])[0];
+        const elStatTopTipo = document.getElementById('mechStatTopTipo');
+        if (elStatTopTipo) {
+            elStatTopTipo.textContent = topTipo ? topTipo[0] : '-';
+        }
 
         const tbody = document.querySelector('#tableHistorial tbody');
         tbody.innerHTML = '';
@@ -188,18 +242,9 @@ async function loadMechanicData() {
         }
 
         misMantenciones.forEach((m, i) => {
-            // Extraer el móvil de la descripción
-            let movil = 'No especificado';
-            if (m.descripcion && m.descripcion.includes('Móvil:')) {
-                const match = m.descripcion.match(/Móvil:\s*([^.]+)\./);
-                if (match && match[1]) movil = match[1].trim();
-            }
-
-            // Determinar Origen
-            const driverStr = m.driver || '';
-            const isMech = driverStr.startsWith('Mecánico');
-            const origen = isMech ? 'Mecánico' : 'Conductor';
-            const origenColor = isMech ? 'var(--brand-secondary)' : 'var(--brand-primary)';
+            const movil = m._parsedMovil || 'No especificado';
+            const origen = m._parsedOrigen === 'mecanico' ? 'Mecánico' : 'Conductor';
+            const origenColor = m._parsedOrigen === 'mecanico' ? 'var(--brand-secondary)' : 'var(--brand-primary)';
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -272,11 +317,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const payload = {
                 type: 'mantencion',
-                // Enviamos como conductor el nombre digitado, si está vacío usamos 'Mecánico - ' + mecanico
-                driver: document.getElementById('mantConductor').value || ('Mecánico - ' + (user ? user.name : 'Desc')),
+                // Enviamos como driver el nombre del mecánico para asegurar el origen
+                driver: 'Mecánico - ' + (user ? user.name : 'Desc'),
                 tipo: document.getElementById('mantTipo').value,
                 kilometraje: document.getElementById('mantKm').value,
-                descripcion: `Móvil: ${document.getElementById('mantMovil').value}. ` + document.getElementById('mantDesc').value,
+                descripcion: `Móvil: ${document.getElementById('mantMovil').value}. Conductor: ${document.getElementById('mantConductor').value || 'Desconocido'}. ` + document.getElementById('mantDesc').value,
                 valor: 0, // Mecánico no ingresa costo
                 imagen: base64Image,
                 fecha: new Date().toISOString()
