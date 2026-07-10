@@ -279,6 +279,8 @@ async function loadData() {
             }
         }
 
+
+
         // Guardar para los modales
         window.currentData = {
             reportes: filteredReportes,

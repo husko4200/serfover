@@ -16,9 +16,10 @@ function switchMechTab(tabId) {
     if(activeNav) activeNav.classList.add('active');
 
     const titles = {
-        'inicio': 'Panel Principal',
-        'historial': 'Historial Mantenciones',
-        'mantencion': 'Ingresar Mantención'
+        'inicio': 'Panel de Inicio',
+        'muro': 'Muro del Equipo',
+        'mantencion': 'Registrar Mantención',
+        'historial': 'Historial de Mantenciones'
     };
     document.getElementById('pageTitle').textContent = titles[tabId] || 'Panel';
 }
@@ -204,33 +205,29 @@ async function loadMechanicData() {
         misMantenciones.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
         window.currentMants = misMantenciones;
 
-        const elStatMant = document.getElementById('mechStatMant');
-        if (elStatMant) elStatMant.textContent = misMantenciones.length;
-
-        const uniqueTrucks = new Set();
-        const typesCount = {};
+        const nowStat = new Date();
+        const currentYearStat = nowStat.getFullYear();
+        const currentMonthStat = nowStat.getMonth();
         
-        misMantenciones.forEach(m => {
-            let movil = 'Desconocido';
-            if (m.descripcion && m.descripcion.includes('Móvil:')) {
-                const match = m.descripcion.match(/Móvil:\s*([^.]+)\./);
-                if (match && match[1]) movil = match[1].trim();
-            } else if (m.movil || m._movil) {
-                movil = m.movil || m._movil;
-            }
-            if (movil !== 'Desconocido') uniqueTrucks.add(movil);
+        let totalMantMes = 0;
+        const typesCountStats = {};
 
-            const tipo = m.tipo || 'General/Otros';
-            typesCount[tipo] = (typesCount[tipo] || 0) + 1;
+        (data.mantenciones || []).forEach(m => {
+            const d = new Date(m.fecha);
+            if (d.getFullYear() === currentYearStat && d.getMonth() === currentMonthStat) {
+                totalMantMes++;
+                const tipo = m.tipo || 'General/Otros';
+                typesCountStats[tipo] = (typesCountStats[tipo] || 0) + 1;
+            }
         });
 
-        const elStatCamiones = document.getElementById('mechStatCamiones');
-        if (elStatCamiones) elStatCamiones.textContent = uniqueTrucks.size;
+        const elStatMant = document.getElementById('mechStatMant');
+        if (elStatMant) elStatMant.textContent = totalMantMes;
 
-        const topTipo = Object.entries(typesCount).sort((a,b) => b[1] - a[1])[0];
+        const topTipoStats = Object.entries(typesCountStats).sort((a,b) => b[1] - a[1])[0];
         const elStatTopTipo = document.getElementById('mechStatTopTipo');
         if (elStatTopTipo) {
-            elStatTopTipo.textContent = topTipo ? topTipo[0] : '-';
+            elStatTopTipo.textContent = topTipoStats ? topTipoStats[0] : '-';
         }
 
         const tbody = document.querySelector('#tableHistorial tbody');
@@ -295,10 +292,8 @@ window.verDetalleMantencion = function(index) {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Si queremos mostrar el mes actual por defecto
-    const now = new Date();
-    const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-    document.getElementById('monthFilter').value = currentMonth;
+    // Eliminar el filtro por defecto del mes para mostrar todo
+    document.getElementById('monthFilter').value = '';
     
     loadMechanicData();
 

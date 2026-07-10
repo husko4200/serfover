@@ -3,19 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SERFOVER - Logística Forestal</title>
-    <meta name="description" content="Plataforma de gestión de logística forestal para SERFOVER">
+    <title>SERFOVER — Logística Forestal</title>
+    <meta name="description" content="Plataforma de gestión de logística forestal para SERFOVER. Controla tu flota, reportes, combustible y mantenciones.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=6">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=13">
 </head>
 <body class="login-body">
+
+    <!-- Animated Background Orbs -->
+    <div class="login-orb login-orb--1"></div>
+    <div class="login-orb login-orb--2"></div>
+    <div class="login-orb login-orb--3"></div>
 
     <div class="login-container">
         <div class="login-card">
             <div class="login-header">
-                <img src="serfover_logo.png" alt="SERFOVER Logo" style="max-width: 350px; width: 100%; height: auto; margin-bottom: 1rem; border-radius: 12px; object-fit: contain;">
+                <div class="login-logo-wrapper">
+                    <img src="serfover_logo.png" alt="SERFOVER Logo">
+                </div>
+                <h1>Logística Forestal</h1>
+                <p class="login-subtitle">Gestiona tu flota, rutas y mantenciones</p>
             </div>
             
             <form id="loginForm" class="login-form">
@@ -38,8 +47,13 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </button>
             </form>
+
+            <div class="login-footer">
+                <p>SERFOVER &copy; 2026 — Todos los derechos reservados</p>
+            </div>
         </div>
     </div>
-    <script src="app.js?v=7"></script>
+
+    <script src="app.js?v=13"></script>
 </body>
 </html>

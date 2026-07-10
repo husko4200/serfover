@@ -3,57 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Mecánico - SERFOVER</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=5">
-    <style>
-        .tabs {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            border-bottom: 1px solid var(--border-light);
-            padding-bottom: 1rem;
-            overflow-x: auto;
-        }
-        .tab-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            padding: 0.5rem 1rem;
-            border-radius: var(--radius-md);
-            transition: all var(--transition-fast);
-            white-space: nowrap;
-        }
-        .tab-btn:hover {
-            color: var(--text-primary);
-            background-color: rgba(255,255,255,0.05);
-        }
-        .tab-btn.active {
-            color: var(--brand-primary);
-            background-color: rgba(16, 185, 129, 0.1);
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+    <title>Panel de Mecánico — SERFOVER</title>
+    <meta name="description" content="Panel de mecánico SERFOVER para registro e historial de mantenciones de la flota forestal">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=13">
+    <link rel="stylesheet" href="social.css?v=1">
 </head>
 <body>
     <div class="app-container">
         <!-- Barra lateral -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <div class="logo-placeholder" style="width: 32px; height: 32px;">
+                <div class="logo-placeholder">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="logo-icon"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                 </div>
                 <h3>SERFOVER</h3>
@@ -62,6 +25,10 @@
                 <div class="nav-item active" onclick="switchMechTab('inicio')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                     Inicio
+                </div>
+                <div class="nav-item" onclick="switchMechTab('muro')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    Muro
                 </div>
                 <div class="nav-item" onclick="switchMechTab('mantencion')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
@@ -73,7 +40,7 @@
                 </div>
             </div>
             <div class="sidebar-footer">
-                <div class="user-info">
+                <div class="user-info" onclick="openProfileModal()" style="cursor: pointer;" title="Editar Perfil">
                     <div class="avatar">M</div>
                     <div class="user-details">
                         <h4 id="userNameDisplay">Mecánico</h4>
@@ -88,13 +55,19 @@
         <main class="main-content">
             <header class="top-header">
                 <h2 class="page-title" id="pageTitle">Historial de Flota</h2>
-                <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <div class="date-display" id="currentDate" style="display: none;"></div>
-                    <button class="btn-icon" onclick="toggleTheme()" aria-label="Toggle Theme">
+                    <button class="mobile-team-btn" onclick="window.Social.toggleTeamSidebar()" aria-label="Ver Equipo" title="Equipo">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    </button>
+                    <button class="btn-icon" onclick="location.reload()" aria-label="Actualizar Página" title="Actualizar">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.21L21.5 8"></path></svg>
+                    </button>
+                    <button class="btn-icon" onclick="toggleTheme()" aria-label="Cambiar Tema" title="Cambiar Tema">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
                     </button>
                     <button id="logoutBtnMobile" class="btn-icon mobile-logout" onclick="document.getElementById('logoutBtn').click()">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1-2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                     </button>
                 </div>
             </header>
@@ -103,14 +76,14 @@
                 
                 <!-- INICIO DEL MECANICO -->
                 <div id="mech-inicio" class="tab-content active">
-                    <div class="card" style="background: linear-gradient(135deg, var(--bg-card), rgba(16, 185, 129, 0.05)); border-color: var(--brand-primary);">
+                    <div class="card">
                         <div class="card-header">
                             <h3 class="card-title" style="font-size: 1.5rem;">Hola, Mecánico 👋</h3>
                         </div>
-                        <div style="padding: 1.5rem;">
-                            <p style="color: var(--text-secondary); margin-bottom: 2rem;">¿Qué deseas hacer hoy?</p>
+                        <div style="padding: 0 0.5rem 1rem;">
+                            <p style="color: var(--text-secondary); margin-bottom: 1.75rem;">¿Qué deseas hacer hoy?</p>
                             
-                            <div class="stats-grid" style="margin-bottom: 2rem; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+                            <div class="stats-grid" style="margin-bottom: 2rem;">
                                 <div class="stat-card">
                                     <div class="stat-icon" style="color: var(--accent-warning); background-color: rgba(245, 158, 11, 0.1);">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
@@ -122,7 +95,7 @@
                                 </div>
 
                                 <div class="stat-card">
-                                    <div class="stat-icon" style="color: var(--brand-secondary); background-color: rgba(37,99,235,0.1);">
+                                    <div class="stat-icon" style="color: var(--brand-secondary); background-color: rgba(59,130,246,0.1);">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
                                     </div>
                                     <div class="stat-info">
@@ -132,20 +105,24 @@
                                 </div>
                             </div>
 
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                                <button onclick="switchMechTab('mantencion')" class="btn btn-secondary" style="height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                            <div class="actions-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <button onclick="switchMechTab('mantencion')" class="action-card">
+                                    <div class="action-icon" style="background: rgba(16,185,129,0.12); color: var(--brand-primary);">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                                    </div>
                                     Ingresar Mantención
                                 </button>
-                                <button onclick="switchMechTab('historial')" class="btn btn-secondary" style="height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem;">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                <button onclick="switchMechTab('historial')" class="action-card">
+                                    <div class="action-icon" style="background: rgba(59,130,246,0.12); color: var(--brand-secondary);">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                    </div>
                                     Historial Mantenciones
                                 </button>
                             </div>
                         </div>
                     </div>
                     
-                    <div id="mechAlertsContainer" style="margin-top: 1.5rem; display: none; display: flex; flex-direction: column; gap: 1rem;">
+                    <div id="mechAlertsContainer" style="margin-top: 1.5rem; display: none; flex-direction: column; gap: 1rem;">
                         <h4 style="color: var(--text-primary); margin-bottom: 0.5rem; display: none;" id="mechAlertsTitle">Alertas de Flota</h4>
                     </div>
                 </div>
@@ -158,16 +135,16 @@
                             <h3 class="card-title">Historial de Mantenciones Realizadas</h3>
                             <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
                                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <label for="monthFilter" style="font-size: 0.9rem;">Mes:</label>
-                                    <input type="month" id="monthFilter" class="form-control" style="padding: 0.3rem 0.5rem; width: auto;" onchange="loadMechanicData()">
+                                    <label for="monthFilter" style="font-size: 0.85rem; color: var(--text-secondary);">Mes:</label>
+                                    <input type="month" id="monthFilter" style="width: auto; padding: 0.4rem 0.6rem; min-height: 38px;" onchange="loadMechanicData()">
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <label for="movilFilter" style="font-size: 0.9rem;">Móvil:</label>
-                                    <input type="text" id="movilFilter" class="form-control" placeholder="Ej: PSJk56" style="padding: 0.3rem 0.5rem; width: 120px;" oninput="loadMechanicData()">
+                                    <label for="movilFilter" style="font-size: 0.85rem; color: var(--text-secondary);">Móvil:</label>
+                                    <input type="text" id="movilFilter" placeholder="Ej: PSJk56" style="width: 120px; padding: 0.4rem 0.6rem; min-height: 38px;" oninput="loadMechanicData()">
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <label for="driverFilter" style="font-size: 0.9rem;">Origen:</label>
-                                    <select id="driverFilter" class="form-control" style="padding: 0.3rem 0.5rem; width: auto;" onchange="loadMechanicData()">
+                                    <label for="driverFilter" style="font-size: 0.85rem; color: var(--text-secondary);">Origen:</label>
+                                    <select id="driverFilter" style="width: auto; padding: 0.4rem 0.6rem; min-height: 38px;" onchange="loadMechanicData()">
                                         <option value="">Todos</option>
                                         <option value="mecanico">Mecánico</option>
                                         <option value="conductor">Conductor</option>
@@ -194,7 +171,30 @@
                         </div>
                     </div>
 
-                    <!-- INGRESAR MANTENCIÓN -->
+                    <!-- MURO SOCIAL -->
+                <div id="mech-muro" class="tab-content">
+                    <div class="create-post-card">
+                        <h3 style="margin-bottom: 1rem;">Publicar en el Muro</h3>
+                        <form id="formCreatePost">
+                            <textarea id="postContent" placeholder="Comparte algo con el equipo..." required></textarea>
+                            <div id="postImagePreview" style="display:none;"></div>
+                            <div class="create-post-actions">
+                                <button type="button" class="action-btn" onclick="document.getElementById('postImageInput').click()" style="color: var(--brand-secondary);">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                    Adjuntar Foto
+                                </button>
+                                <input type="file" id="postImageInput" accept="image/*" style="display:none">
+                                <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1.5rem;">Publicar</button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div id="feedContainer">
+                        <!-- Posts se cargan dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- INGRESAR MANTENCIÓN -->
                     <div id="mech-mantencion" class="tab-content">
                         <div class="card-header">
                             <h3 class="card-title">Registro de Mantención a Camión</h3>
@@ -210,7 +210,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Mantención hecha por</label>
-                                <input type="text" id="mantRealizadoPor" value="Mecánico" readonly style="background: var(--bg-hover); color: var(--brand-primary); font-weight: bold; cursor: not-allowed;">
+                                <input type="text" id="mantRealizadoPor" value="Mecánico" readonly style="opacity: 0.7; cursor: not-allowed;">
                             </div>
                             <div class="form-group">
                                 <label>Tipo de Mantención</label>
@@ -255,21 +255,85 @@
 
             </div>
         </main>
+
+        <aside class="right-sidebar">
+            <div class="right-sidebar-header">
+                <h3>Equipo SERFOVER</h3>
+            </div>
+            <div class="users-list" id="usersListContainer">
+                <p style="text-align: center; color: var(--text-secondary); margin-top: 2rem;">Cargando usuarios...</p>
+            </div>
+        </aside>
     </div>
 
-    <!-- Modal Detalles -->
+    <!-- Floating Chat Window -->
+    <div id="chatWindow" class="chat-window">
+        <div class="chat-header">
+            <h4 id="chatTitle">Usuario</h4>
+            <button class="close-btn" onclick="window.Social.closeChat()" style="color: white; margin: 0; font-size: 1.5rem;">&times;</button>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <form id="formChat" class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="Escribe un mensaje..." required autocomplete="off">
+            <button type="submit">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+        </form>
+    </div>
+
+    <!-- Modal Editar Mantención -->
     <div id="detailModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modalTitle">Detalle</h3>
-                <button class="close-btn" onclick="closeModal()">×</button>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
             </div>
             <div id="modalBody" class="modal-body"></div>
         </div>
     </div>
 
-    <script src="app.js?v=8"></script>
-    <script src="api.js?v=4"></script>
-    <script src="mechanic.js?v=6"></script>
+    <!-- Modal Perfil -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Mi Perfil</h3>
+                <button class="close-btn" onclick="closeProfileModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="profileForm" class="form-grid">
+                    <div class="form-group" style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+                        <div id="profileAvatarPreview" style="width: 80px; height: 80px; border-radius: 50%; background: var(--surface-hover); border: 2px solid var(--brand-primary); overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--text-secondary);">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </div>
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('profileAvatarInput').click()" style="font-size: 0.8rem; padding: 0.3rem 0.8rem;">Cambiar Foto</button>
+                        <input type="file" id="profileAvatarInput" accept="image/*" style="display:none" onchange="handleProfileAvatarChange(this)">
+                    </div>
+                    
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Nombre de Usuario</label>
+                        <input type="text" id="profileUsername" required>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Contraseña</label>
+                        <input type="text" id="profilePassword" required>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Apodo / Nombre Visible</label>
+                        <input type="text" id="profileName" required>
+                    </div>
+                    
+                    <div style="grid-column: 1 / -1;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Guardar Cambios</button>
+                        <div id="profileStatus" style="margin-top: 1rem; text-align: center; display: none;"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js?v=13"></script>
+    <script src="api.js?v=13"></script>
+    <script src="social.js?v=1"></script>
+    <script src="mechanic.js?v=13"></script>
 </body>
 </html>

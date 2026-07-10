@@ -14,6 +14,7 @@ function switchTab(tabId) {
     // Cambiar título
     const titles = {
         'inicio': 'Panel de Inicio',
+        'muro': 'Muro del Equipo',
         'reporte': 'Hoja de Ruta',
         'combustible': 'Control de Combustible',
         'mantencion': 'Registro de Mantenciones',
@@ -213,7 +214,13 @@ async function loadDriverHistory() {
 
         // 1. Encontrar el móvil actual del conductor
         let misReps = (data.reportes || []).filter(r => r.driver === user.name).sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-        let miMovil = misReps.length > 0 ? misReps[0].movil : null;
+        
+        let miMovil = null;
+        if (user.truck && user.truck.trim() !== '') {
+            miMovil = user.truck.trim();
+        } else {
+            miMovil = misReps.length > 0 ? misReps[0].movil : null;
+        }
 
         // --- Historial de Reportes ---
         let misReportes = misReps;
@@ -264,11 +271,36 @@ async function loadDriverHistory() {
         misMantenciones.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
         window.currentDriverMants = misMantenciones;
 
+        const nowStat = new Date();
+        const currentYearStat = nowStat.getFullYear();
+        const currentMonthStat = nowStat.getMonth();
+        
+        let driverViajesMes = 0;
+        misReps.forEach(r => {
+            const d = new Date(r.fecha);
+            if(d.getFullYear() === currentYearStat && d.getMonth() === currentMonthStat) driverViajesMes++;
+        });
+
+        let driverMantMes = 0;
+        let totalMantMesCost = 0;
+        (data.mantenciones || []).filter(m => {
+            const isMine = m.driver === user.name;
+            const movilMant = getMovilFromDesc(m.descripcion);
+            const isMyTruck = miMovil && movilMant && movilMant.toLowerCase() === miMovil.toLowerCase();
+            return isMine || isMyTruck;
+        }).forEach(m => {
+            const d = new Date(m.fecha);
+            if(d.getFullYear() === currentYearStat && d.getMonth() === currentMonthStat) {
+                driverMantMes++;
+                totalMantMesCost += parseFloat(m.valor || 0);
+            }
+        });
+
         const elStatViajes = document.getElementById('driverStatViajes');
-        if (elStatViajes) elStatViajes.textContent = misReportes.length;
+        if (elStatViajes) elStatViajes.textContent = driverViajesMes;
 
         const elStatMant = document.getElementById('driverStatMant');
-        if (elStatMant) elStatMant.textContent = misMantenciones.length;
+        if (elStatMant) elStatMant.textContent = driverMantMes;
 
         const tbodyMant = document.querySelector('#tableDriverMantenciones tbody');
         if (tbodyMant) {
@@ -327,30 +359,31 @@ async function loadDriverHistory() {
                 });
             }
         }
-        let totalComb = 0;
-        misCombustibles.forEach(c => {
-            totalComb += parseFloat(c.valorTotal || c.valor || 0);
-        });
-
-        let totalMant = 0;
-        misMantenciones.forEach(m => {
-            totalMant += parseFloat(m.valor || 0);
+        let totalCombMesCost = 0;
+        (data.combustibles || []).filter(c => c.driver === user.name).forEach(c => {
+            const d = new Date(c.fecha);
+            if(d.getFullYear() === currentYearStat && d.getMonth() === currentMonthStat) {
+                totalCombMesCost += parseFloat(c.valorTotal || c.valor || 0);
+            }
         });
 
         const elComb = document.getElementById('driverStatGastoComb');
-        if (elComb) elComb.textContent = '$' + totalComb.toLocaleString('es-CL');
+        if (elComb) elComb.textContent = '$' + totalCombMesCost.toLocaleString('es-CL');
 
         const elMant = document.getElementById('driverStatGastoMant');
-        if (elMant) elMant.textContent = '$' + totalMant.toLocaleString('es-CL');
+        if (elMant) elMant.textContent = '$' + totalMantMesCost.toLocaleString('es-CL');
 
-        let totalKm = 0;
-        misReportes.forEach(rep => {
-            const kmIni = parseInt(rep.kmInicio) || 0;
-            const kmFin = parseInt(rep.kmTermino) || 0;
-            if (kmFin > kmIni) totalKm += (kmFin - kmIni);
+        let totalKmMes = 0;
+        misReps.forEach(rep => {
+            const d = new Date(rep.fecha);
+            if(d.getFullYear() === currentYearStat && d.getMonth() === currentMonthStat) {
+                const kmIni = parseInt(rep.kmInicio) || 0;
+                const kmFin = parseInt(rep.kmTermino) || 0;
+                if (kmFin > kmIni) totalKmMes += (kmFin - kmIni);
+            }
         });
         const elKm = document.getElementById('driverStatKmTotales');
-        if (elKm) elKm.textContent = totalKm.toLocaleString('es-CL') + ' km';
+        if (elKm) elKm.textContent = totalKmMes.toLocaleString('es-CL') + ' km';
 
         // Alertas de cambio de aceite para el móvil asignado
         if (miMovil) {
@@ -480,15 +513,21 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('dashDriverName').textContent = user.name;
     }
 
-    // Configurar mes por defecto en el historial
-    const now = new Date();
-    const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+    // Eliminar filtros por defecto del mes para mostrar todo el historial
     const driverMonthFilter = document.getElementById('driverMonthFilter');
-    if (driverMonthFilter) driverMonthFilter.value = currentMonth;
+    if (driverMonthFilter) driverMonthFilter.value = '';
     const driverMantMonthFilter = document.getElementById('driverMantMonthFilter');
-    if (driverMantMonthFilter) driverMantMonthFilter.value = currentMonth;
+    if (driverMantMonthFilter) driverMantMonthFilter.value = '';
     const driverCombMonthFilter = document.getElementById('driverCombMonthFilter');
-    if (driverCombMonthFilter) driverCombMonthFilter.value = currentMonth;
+    if (driverCombMonthFilter) driverCombMonthFilter.value = '';
+
+    // Autocompletar la patente del camión si está configurada en el perfil
+    if (user && user.truck && user.truck.trim() !== '') {
+        const repMovilInput = document.getElementById('repMovil');
+        if (repMovilInput) {
+            repMovilInput.value = user.truck.trim();
+        }
+    }
     
     // Cargar historial
     loadDriverHistory();
