@@ -116,12 +116,14 @@ function checkFleetAlerts(data) {
     existingAlerts.forEach(el => el.remove());
 
     let hasAlerts = false;
+    let alertCount = 0;
 
     Object.values(fleetMap).forEach(truck => {
         if (truck.lastOilKm > 0) {
             const diff = truck.maxKm - truck.lastOilKm;
             if (diff >= 35000) {
                 hasAlerts = true;
+                alertCount++;
                 const alertDiv = document.createElement('div');
                 alertDiv.className = 'alert-box';
                 alertDiv.style.padding = '1rem';
@@ -144,6 +146,9 @@ function checkFleetAlerts(data) {
         }
     });
 
+    const statAlertas = document.getElementById('mechStatAlertas');
+    if (statAlertas) statAlertas.textContent = alertCount;
+
     if (hasAlerts) {
         alertsContainer.style.display = 'flex';
         alertsTitle.style.display = 'block';
@@ -154,6 +159,14 @@ function checkFleetAlerts(data) {
 }
 
 async function loadMechanicData() {
+    const setCargando = (id) => {
+        const el = document.getElementById(id);
+        if (el && (el.textContent.trim() === '0' || el.textContent.trim() === '-')) {
+            el.innerHTML = '<span style="font-size: 0.9rem; color: var(--text-muted);">Cargando...</span>';
+        }
+    };
+    ['mechStatMant', 'mechStatTopTipo', 'mechStatAlertas', 'mechStatTopMovil'].forEach(setCargando);
+
     try {
         const data = await API.getData();
         if (!data) return;
@@ -211,6 +224,7 @@ async function loadMechanicData() {
         
         let totalMantMes = 0;
         const typesCountStats = {};
+        const movilCountStats = {};
 
         (data.mantenciones || []).forEach(m => {
             const d = new Date(m.fecha);
@@ -218,6 +232,15 @@ async function loadMechanicData() {
                 totalMantMes++;
                 const tipo = m.tipo || 'General/Otros';
                 typesCountStats[tipo] = (typesCountStats[tipo] || 0) + 1;
+                
+                let movil = m.movil || m._movil || 'Desconocido';
+                if(movil === 'Desconocido' && m.descripcion && m.descripcion.includes('Móvil:')) {
+                    const match = m.descripcion.match(/Móvil:\s*([^.]+)\./);
+                    if (match && match[1]) movil = match[1].trim();
+                }
+                if (movil !== 'Desconocido') {
+                    movilCountStats[movil] = (movilCountStats[movil] || 0) + 1;
+                }
             }
         });
 
@@ -228,6 +251,12 @@ async function loadMechanicData() {
         const elStatTopTipo = document.getElementById('mechStatTopTipo');
         if (elStatTopTipo) {
             elStatTopTipo.textContent = topTipoStats ? topTipoStats[0] : '-';
+        }
+
+        const topMovilStats = Object.entries(movilCountStats).sort((a,b) => b[1] - a[1])[0];
+        const elStatTopMovil = document.getElementById('mechStatTopMovil');
+        if (elStatTopMovil) {
+            elStatTopMovil.textContent = topMovilStats ? topMovilStats[0] : '-';
         }
 
         const tbody = document.querySelector('#tableHistorial tbody');

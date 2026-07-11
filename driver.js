@@ -201,6 +201,14 @@ function getMovilFromDesc(desc) {
 }
 
 async function loadDriverHistory() {
+    const setCargando = (id) => {
+        const el = document.getElementById(id);
+        if (el && (el.textContent.trim() === '0' || el.textContent.trim() === '$0' || el.textContent.trim() === '0 km' || el.textContent.trim() === '-' || el.textContent.trim() === '0 viajes' || el.textContent.trim() === '0 mantenciones')) {
+            el.innerHTML = '<span style="font-size: 0.9rem; color: var(--text-muted);">Cargando...</span>';
+        }
+    };
+    ['driverStatViajes', 'driverStatMant', 'driverStatGastoComb', 'driverStatGastoMant', 'driverStatKmTotales', 'rankDriverMostTrips', 'rankDriverMostTripsVal', 'rankDriverTopFuel', 'rankDriverTopFuelVal', 'rankDriverTopMant', 'rankDriverTopMantVal'].forEach(setCargando);
+
     try {
         const data = await API.getData();
         if (!data) return;
@@ -436,6 +444,153 @@ async function loadDriverHistory() {
                 }
             }
         }
+
+        // --- Ranking Completo de Flota ---
+        const truckTripsMap = {};
+        const truckFuelMap = {};
+        const truckMantMap = {};
+
+        (data.reportes || []).forEach(r => {
+            const d = new Date(r.fecha);
+            if(d.getFullYear() === currentYearStat && d.getMonth() === currentMonthStat) {
+                let m = getMovilFromDesc(r.descripcion) || r.movil || r._movil || 'Desconocido';
+                if (m !== 'Desconocido') truckTripsMap[m] = (truckTripsMap[m] || 0) + 1;
+            }
+        });
+
+        (data.combustibles || []).forEach(c => {
+            const d = new Date(c.fecha);
+            if(d.getFullYear() === currentYearStat && d.getMonth() === currentMonthStat) {
+                let m = c.movil || c._movil || 'Desconocido';
+                if (m !== 'Desconocido') truckFuelMap[m] = (truckFuelMap[m] || 0) + parseFloat(c.valorTotal || c.valor || 0);
+            }
+        });
+
+        (data.mantenciones || []).forEach(m => {
+            const d = new Date(m.fecha);
+            if(d.getFullYear() === currentYearStat && d.getMonth() === currentMonthStat) {
+                let mvl = getMovilFromDesc(m.descripcion) || m.movil || m._movil || 'Desconocido';
+                if (mvl !== 'Desconocido') truckMantMap[mvl] = (truckMantMap[mvl] || 0) + 1;
+            }
+        });
+
+        const topTripsTruck = Object.entries(truckTripsMap).sort((a, b) => b[1] - a[1])[0];
+        if (topTripsTruck && document.getElementById('rankDriverMostTrips')) {
+            document.getElementById('rankDriverMostTrips').textContent = topTripsTruck[0];
+            document.getElementById('rankDriverMostTripsVal').textContent = topTripsTruck[1] + ' viajes';
+        }
+
+        const topFuelTruck = Object.entries(truckFuelMap).sort((a, b) => b[1] - a[1])[0];
+        if (topFuelTruck && document.getElementById('rankDriverTopFuel')) {
+            document.getElementById('rankDriverTopFuel').textContent = topFuelTruck[0];
+            document.getElementById('rankDriverTopFuelVal').textContent = '$' + parseInt(topFuelTruck[1]).toLocaleString('es-CL');
+        }
+
+        const topMantTruck = Object.entries(truckMantMap).sort((a, b) => b[1] - a[1])[0];
+        if (topMantTruck && document.getElementById('rankDriverTopMant')) {
+            document.getElementById('rankDriverTopMant').textContent = topMantTruck[0];
+            document.getElementById('rankDriverTopMantVal').textContent = topMantTruck[1] + ' mantenciones';
+        }
+
+        // --- Gráfico 1: Distribución de Gastos (Mes Actual) ---
+        if (window._driverExpensesChartInst) window._driverExpensesChartInst.destroy();
+        const ctxEx = document.getElementById('driverExpensesChart');
+        if (ctxEx) {
+            const hasData = (totalCombMesCost + totalMantMesCost) > 0;
+            const cData = hasData ? [totalCombMesCost, totalMantMesCost] : [1];
+            const cLabels = hasData ? ['Combustible', 'Mantenciones'] : ['Sin Gastos Este Mes'];
+            const cColors = hasData ? ['#ef4444', '#f59e0b'] : ['#e2e8f0'];
+
+            window._driverExpensesChartInst = new Chart(ctxEx, {
+                type: 'doughnut',
+                data: {
+                    labels: cLabels,
+                    datasets: [{
+                        data: cData,
+                        backgroundColor: cColors,
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: 'var(--text-primary)', font: { family: 'Outfit, sans-serif' } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (!hasData) return 'Sin Gastos';
+                                    let label = context.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed !== null) label += '$' + context.parsed.toLocaleString('es-CL');
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        // --- Gráfico 2: Viajes Últimos 6 Meses ---
+        if (window._driverTripsChartInst) window._driverTripsChartInst.destroy();
+        const ctxTr = document.getElementById('driverTripsChart');
+        if (ctxTr) {
+            const monthsNames = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
+            const last6Months = [];
+            const tripsData = [];
+
+            const d = new Date();
+            for (let i = 5; i >= 0; i--) {
+                const pastDate = new Date(d.getFullYear(), d.getMonth() - i, 1);
+                last6Months.push(monthsNames[pastDate.getMonth()]);
+                
+                // Contar viajes para ese mes y año del conductor
+                const count = (data.reportes || []).filter(r => {
+                    if (r.driver !== user.name) return false;
+                    const rd = new Date(r.fecha);
+                    return rd.getFullYear() === pastDate.getFullYear() && rd.getMonth() === pastDate.getMonth();
+                }).length;
+                tripsData.push(count);
+            }
+
+            window._driverTripsChartInst = new Chart(ctxTr, {
+                type: 'bar',
+                data: {
+                    labels: last6Months,
+                    datasets: [{
+                        label: 'Viajes Realizados',
+                        data: tripsData,
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                        borderColor: 'rgb(59, 130, 246)',
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: c => c.parsed.y + ' viajes' } }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: 'var(--text-secondary)', stepSize: 1 }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: 'var(--text-secondary)' }
+                        }
+                    }
+                }
+            });
+        }
+
     } catch (error) {
         console.error('Error cargando historiales del conductor', error);
     }

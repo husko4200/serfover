@@ -48,51 +48,22 @@ class SocialManager {
         }, 10000);
     }
 
-    // --- DATOS SOCIALES (Híbrido: Local + Google Sheets) ---
+    // --- DATOS SOCIALES (Solo LocalStorage) ---
     async fetchSocialData(type) {
-        // Intentar cargar desde Google Sheets
-        try {
-            const data = await API.getData();
-            const cloudData = data['social_' + type] || [];
-            // Si hay datos en la nube, guardarlos localmente como caché
-            if (cloudData.length > 0) {
-                localStorage.setItem(`serfover_social_${type}`, JSON.stringify(cloudData));
-                return cloudData;
-            }
-        } catch(e) {
-            console.warn('No se pudo cargar desde la nube, usando datos locales:', e);
-        }
-        // Fallback a localStorage
         return JSON.parse(localStorage.getItem(`serfover_social_${type}`)) || [];
     }
 
     async saveSocialData(type, item) {
-        // 1. Guardar localmente de inmediato para que se vea al instante
         const localData = JSON.parse(localStorage.getItem(`serfover_social_${type}`)) || [];
         localData.push(item);
         localStorage.setItem(`serfover_social_${type}`, JSON.stringify(localData));
-
-        // 2. Enviar a Google Sheets en segundo plano (sin esperar respuesta)
-        try {
-            API.sendData({ type: 'social_' + type, data: item });
-        } catch(e) {
-            console.warn('Error enviando a la nube:', e);
-        }
         return true;
     }
 
     async deleteSocialData(type, itemId) {
-        // 1. Borrar localmente de inmediato
         let localData = JSON.parse(localStorage.getItem(`serfover_social_${type}`)) || [];
         localData = localData.filter(item => item.id !== itemId);
         localStorage.setItem(`serfover_social_${type}`, JSON.stringify(localData));
-
-        // 2. Borrar en Google Sheets en segundo plano
-        try {
-            API.deleteData('social_' + type, itemId);
-        } catch(e) {
-            console.warn('Error eliminando de la nube:', e);
-        }
     }
 
     async updateSocialData(type, data) {
@@ -331,8 +302,8 @@ class SocialManager {
         usersListContainer.innerHTML = '';
         
         // No mostrarse a sí mismo en la lista derecha, o mostrarlo arriba? 
-        // Mejor mostrar a todos excepto a mí para chatear.
-        const otherUsers = allUsers.filter(u => u.username !== this.currentUser.username);
+        // Mostrar a todos excepto admin
+        const otherUsers = allUsers.filter(u => u.username !== this.currentUser.username && u.role !== 'owner');
 
         if (otherUsers.length === 0) {
             usersListContainer.innerHTML = '<p style="text-align:center; color:var(--text-secondary); font-size:0.9rem;">No hay otros usuarios.</p>';
@@ -350,14 +321,9 @@ class SocialManager {
 
             const userEl = document.createElement('div');
             userEl.className = 'user-contact-card';
-            userEl.onclick = () => {
-                this.openChat(user.username);
-                // Cerrar sidebar en móviles al seleccionar un chat
-                const sidebar = document.querySelector('.right-sidebar');
-                if(sidebar && window.innerWidth <= 1200) {
-                    sidebar.classList.remove('active');
-                }
-            };
+            userEl.className = 'user-contact-card';
+            // Disable opening private chat by overriding onClick, maybe later we add private chat. 
+            // userEl.onclick = () => { this.openChat(user.username); ... }
             userEl.innerHTML = `
                 <div class="user-contact-avatar">${avatarHtml}</div>
                 <div class="user-contact-info">
@@ -379,19 +345,14 @@ class SocialManager {
         }
     }
 
-    // --- CHAT DIRECTO ---
-    openChat(targetUsername) {
-        this.currentChatUser = targetUsername;
+    // --- CHAT GRUPAL ---
+    openChat() {
+        this.currentChatUser = 'group'; // Usamos 'group' como identificador del chat grupal
         
-        const allUsers = JSON.parse(localStorage.getItem('serfover_users')) || [];
-        const targetUser = allUsers.find(u => u.username === targetUsername);
-        
-        if (!targetUser) return;
-
-        document.getElementById('chatTitle').textContent = targetUser.name;
+        document.getElementById('chatTitle').textContent = 'Chat Grupal (General)';
         document.getElementById('chatWindow').classList.add('active');
         
-        this.loadChat(targetUsername);
+        this.loadChat('group');
     }
 
     closeChat() {
@@ -405,23 +366,27 @@ class SocialManager {
 
         const allMessages = await this.fetchSocialData('messages');
         
-        // Filtrar mensajes entre mi usuario y el target
-        const chatHistory = allMessages.filter(m => 
-            (m.from === this.currentUser.username && m.to === targetUsername) ||
-            (m.from === targetUsername && m.to === this.currentUser.username)
-        );
+        // Mostrar todos los mensajes que vayan al 'group'
+        const chatHistory = allMessages.filter(m => m.to === 'group');
 
         chatHistory.sort((a, b) => new Date(a.date) - new Date(b.date));
 
         chatMessagesContainer.innerHTML = '';
         if (chatHistory.length === 0) {
-            chatMessagesContainer.innerHTML = '<p style="text-align:center; color:var(--text-secondary); margin-top:1rem; font-size:0.8rem;">Envía un mensaje para saludar.</p>';
+            chatMessagesContainer.innerHTML = '<p style="text-align:center; color:var(--text-secondary); margin-top:1rem; font-size:0.8rem;">Sé el primero en enviar un mensaje.</p>';
         } else {
             chatHistory.forEach(msg => {
                 const isMine = msg.from === this.currentUser.username;
                 const bubble = document.createElement('div');
                 bubble.className = `chat-bubble ${isMine ? 'sent' : 'received'}`;
+                
+                let authorHtml = '';
+                if (!isMine) {
+                    authorHtml = `<strong style="font-size: 0.75rem; color: var(--brand-secondary); display: block; margin-bottom: 2px;">${msg.fromName || msg.from}</strong>`;
+                }
+
                 bubble.innerHTML = `
+                    ${authorHtml}
                     ${this.escapeHtml(msg.content)}
                     <span class="chat-bubble-time">${this.formatTime(msg.date)}</span>
                 `;
@@ -437,12 +402,13 @@ class SocialManager {
         e.preventDefault();
         const input = document.getElementById('chatInput');
         const content = input.value.trim();
-        if (!content || !this.currentChatUser) return;
+        if (!content) return;
 
         const newMsg = {
             id: 'msg_' + Date.now(),
             from: this.currentUser.username,
-            to: this.currentChatUser,
+            fromName: this.currentUser.name,
+            to: 'group',
             content: content,
             date: new Date().toISOString()
         };
@@ -450,7 +416,7 @@ class SocialManager {
         await this.saveSocialData('messages', newMsg);
         
         input.value = '';
-        this.loadChat(this.currentChatUser);
+        this.loadChat('group');
     }
 
     // --- UTILIDADES ---

@@ -6,7 +6,6 @@
  */
 
 const GOOGLE_SHEETS_URL_DATA = "https://script.google.com/macros/s/AKfycbyCL-ZL5Rm7kOTpYNgqeOSbRanY1067sVv7bpwZ_H_9f-nVMEVYiKedXKcHh1kKh3Zl/exec";
-const GOOGLE_SHEETS_URL_SOCIAL = "https://script.google.com/macros/s/AKfycbwK3jJUxAri9ygn9V4ySQMqvd-usQdIxlTInCtVe3bln8aYjK7OAO1DsJWUyx1CqIwG/exec";
 
 class SERFOVER_API {
     constructor() {
@@ -18,9 +17,6 @@ class SERFOVER_API {
     }
 
     _getUrl(type) {
-        if (type && type.startsWith('social_')) {
-            return GOOGLE_SHEETS_URL_SOCIAL;
-        }
         return GOOGLE_SHEETS_URL_DATA;
     }
 
@@ -42,15 +38,46 @@ class SERFOVER_API {
 
     async getData() {
         try {
-            // Obtener ambos y combinarlos
-            const [resData, resSocial] = await Promise.all([
-                fetch(GOOGLE_SHEETS_URL_DATA).then(r => r.json()).catch(() => ({ reportes: [], combustibles: [], mantenciones: [] })),
-                fetch(GOOGLE_SHEETS_URL_SOCIAL).then(r => r.json()).catch(() => ({ social_posts: [], social_messages: [] }))
-            ]);
-            return { ...resData, ...resSocial };
+            const resData = await fetch(GOOGLE_SHEETS_URL_DATA)
+                .then(r => r.json())
+                .catch(e => {
+                    console.error("Fetch error:", e);
+                    return null;
+                });
+            
+            if (resData && resData.reportes) {
+                // Guardar en cache, pero eliminando las imágenes base64 para evitar QuotaExceededError (límite 5MB)
+                try {
+                    const dataForCache = JSON.parse(JSON.stringify(resData));
+                    if (dataForCache.reportes) {
+                        dataForCache.reportes.forEach(r => delete r.imagen);
+                    }
+                    if (dataForCache.combustibles) {
+                        dataForCache.combustibles.forEach(c => delete c.imagenUrl);
+                    }
+                    if (dataForCache.mantenciones) {
+                        dataForCache.mantenciones.forEach(m => delete m.imagen);
+                    }
+                    localStorage.setItem('serfover_data_cache', JSON.stringify(dataForCache));
+                } catch(e) {
+                    console.warn('No se pudo guardar en cache por límite de espacio:', e);
+                }
+                return resData;
+            } else {
+                // Si la respuesta es inválida, intentar usar el cache
+                try {
+                    const cached = localStorage.getItem('serfover_data_cache');
+                    if (cached) return JSON.parse(cached);
+                } catch(e) { console.warn(e); }
+                return { reportes: [], combustibles: [], mantenciones: [] };
+            }
         } catch (error) {
-            console.error('Error obteniendo datos combinados:', error);
-            return { reportes: [], combustibles: [], mantenciones: [], social_posts: [], social_messages: [] };
+            console.error('Error obteniendo datos:', error);
+            try {
+                const cached = localStorage.getItem('serfover_data_cache');
+                if (cached) return JSON.parse(cached);
+            } catch(e) { console.warn(e); }
+            return { reportes: [], combustibles: [], mantenciones: [] };
         }
     }
 

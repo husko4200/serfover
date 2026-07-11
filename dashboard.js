@@ -49,6 +49,17 @@ window.currentData = {
 };
 
 async function loadData() {
+    // Mostrar estado de carga en vez de ceros
+    const setCargando = (id) => {
+        const el = document.getElementById(id);
+        if (el && (el.textContent.trim() === '0' || el.textContent.trim() === '$0' || el.textContent.trim() === '-')) {
+            el.innerHTML = '<span style="font-size: 0.9rem; color: var(--text-muted);">Cargando...</span>';
+        }
+    };
+    ['statViajes', 'statCantMantenciones', 'statCombustible', 'statMantencion', 'statOtrosGastos', 
+     'rankMostTripsTruck', 'rankMostTripsValue', 'rankTopDriver', 'rankTopDriverValue', 
+     'rankTopFuelTruck', 'rankTopFuelValue'].forEach(setCargando);
+
     try {
         const data = await API.getData();
         if (!data) return;
@@ -812,3 +823,145 @@ window.descargarHojaRutaPDF = function(index, isOwner = true) {
 
     doc.save(`Hoja_de_Ruta_${rep.movil}_${new Date(rep.fecha).toLocaleDateString('es-CL').replace(/\//g, '-')}.pdf`);
 };
+
+// --- GESTIÓN DE USUARIOS ---
+window.loadUsersTable = function() {
+    const tableBody = document.querySelector('#tableUsuarios tbody');
+    if (!tableBody) return;
+
+    const users = JSON.parse(localStorage.getItem('serfover_users')) || [];
+    tableBody.innerHTML = '';
+
+    users.forEach((u, i) => {
+        const tr = document.createElement('tr');
+        
+        let roleDisplay = 'Conductor';
+        let roleClass = 'driver-badge';
+        if (u.role === 'owner') { roleDisplay = 'Administrador'; roleClass = 'owner-badge'; }
+        if (u.role === 'mechanic') { roleDisplay = 'Mecánico'; roleClass = 'mechanic-badge'; }
+
+        // Security check: don't allow deleting the first owner (usually the main admin) if it's the only one
+        const isDeleteDisabled = (u.role === 'owner' && users.filter(x => x.role === 'owner').length === 1);
+
+        tr.innerHTML = `
+            <td data-label="Usuario"><strong>${u.username}</strong></td>
+            <td data-label="Nombre">${u.name}</td>
+            <td data-label="Rol"><span class="badge ${roleClass}" style="padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.75rem; background: var(--surface-hover);">${roleDisplay}</span></td>
+            <td data-label="Contraseña"><span style="filter: blur(4px); transition: filter 0.2s; cursor: pointer;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='blur(4px)'">${u.password}</span></td>
+            <td data-label="Móvil">${u.truck || '-'}</td>
+            <td data-label="Acciones">
+                <button class="view-btn" onclick="openUserModal('${u.username}')" style="background: rgba(59,130,246,0.1); color: var(--brand-secondary); margin-right: 0.5rem;">Editar</button>
+                <button class="view-btn" onclick="deleteUser('${u.username}')" style="background: rgba(239,68,68,0.1); color: var(--accent-danger);" ${isDeleteDisabled ? 'disabled style="opacity: 0.5;"' : ''}>Eliminar</button>
+            </td>
+        `;
+        tableBody.appendChild(tr);
+    });
+};
+
+window.openUserModal = function(username = null) {
+    const modal = document.getElementById('userModal');
+    const title = document.getElementById('userModalTitle');
+    const form = document.getElementById('userForm');
+    
+    form.reset();
+    document.getElementById('userOriginalUsername').value = '';
+    
+    if (username !== null && username !== 'null' && typeof username === 'string') {
+        title.textContent = 'Editar Usuario';
+        const users = JSON.parse(localStorage.getItem('serfover_users')) || [];
+        const user = users.find(u => u.username === username);
+        if (user) {
+            document.getElementById('userOriginalUsername').value = user.username;
+            document.getElementById('userUsername').value = user.username;
+            document.getElementById('userName').value = user.name;
+            document.getElementById('userPassword').value = user.password;
+            document.getElementById('userRole').value = user.role;
+            document.getElementById('userTruck').value = user.truck || '';
+        }
+    } else {
+        title.textContent = 'Crear Nuevo Usuario';
+    }
+    
+    modal.classList.add('active');
+};
+
+window.closeUserModal = function() {
+    const modal = document.getElementById('userModal');
+    if (modal) modal.classList.remove('active');
+};
+
+window.deleteUser = function(username) {
+    customConfirm(`¿Estás seguro de que quieres eliminar al usuario '${username}'? Esta acción no se puede deshacer.`, () => {
+        let users = JSON.parse(localStorage.getItem('serfover_users')) || [];
+        users = users.filter(u => u.username !== username);
+        localStorage.setItem('serfover_users', JSON.stringify(users));
+        showToast(`Usuario ${username} eliminado exitosamente.`);
+        loadUsersTable();
+    });
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    const userForm = document.getElementById('userForm');
+    if (userForm) {
+        userForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const originalUsername = document.getElementById('userOriginalUsername').value;
+            const newUsername = document.getElementById('userUsername').value.toLowerCase().trim();
+            const newName = document.getElementById('userName').value;
+            const newPassword = document.getElementById('userPassword').value;
+            const newRole = document.getElementById('userRole').value;
+            const newTruck = document.getElementById('userTruck').value;
+            
+            let users = JSON.parse(localStorage.getItem('serfover_users')) || [];
+            
+            // Check if creating and username exists
+            if (!originalUsername) {
+                if (users.find(u => u.username === newUsername)) {
+                    showToast("Ese nombre de usuario ya existe.", "error");
+                    return;
+                }
+                // Create
+                users.push({
+                    username: newUsername,
+                    password: newPassword,
+                    name: newName,
+                    role: newRole,
+                    truck: newTruck,
+                    avatar: ''
+                });
+                showToast("Usuario creado exitosamente.");
+            } else {
+                // Check if renaming to an existing username
+                if (originalUsername !== newUsername && users.find(u => u.username === newUsername)) {
+                    showToast("El nuevo nombre de usuario ya está ocupado.", "error");
+                    return;
+                }
+                // Edit
+                const idx = users.findIndex(u => u.username === originalUsername);
+                if (idx !== -1) {
+                    users[idx].username = newUsername;
+                    users[idx].password = newPassword;
+                    users[idx].name = newName;
+                    users[idx].role = newRole;
+                    users[idx].truck = newTruck;
+                }
+                showToast("Usuario actualizado exitosamente.");
+            }
+            
+            localStorage.setItem('serfover_users', JSON.stringify(users));
+            closeUserModal();
+            loadUsersTable();
+        });
+    }
+    
+    // Inject loadUsersTable to run when tabs switch to 'usuarios'
+    const originalSwitchTab = window.switchDashTab;
+    window.switchDashTab = function(tabId) {
+        if(originalSwitchTab) originalSwitchTab(tabId);
+        
+        if (tabId === 'usuarios') {
+            loadUsersTable();
+        }
+    };
+});

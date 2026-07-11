@@ -9,10 +9,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css?v=13">
-    <link rel="stylesheet" href="social.css?v=1">
 </head>
 <body>
     <div class="app-container">
+        <div class="sidebar-overlay" onclick="toggleMobileMenu()"></div>
         <aside class="sidebar">
             <div class="sidebar-header">
                 <div class="logo-placeholder">
@@ -24,10 +24,6 @@
                 <div class="nav-item active" onclick="switchDashTab('inicio')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                     Inicio
-                </div>
-                <div class="nav-item" onclick="switchDashTab('muro')">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                    Muro
                 </div>
                 <div class="nav-item" onclick="switchDashTab('flota')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
@@ -45,6 +41,10 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
                     Mantenciones
                 </div>
+                <div class="nav-item" onclick="switchDashTab('usuarios')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    Usuarios
+                </div>
             </div>
             <div class="sidebar-footer">
                 <div class="user-info" onclick="openProfileModal()" style="cursor: pointer;" title="Editar Perfil">
@@ -60,11 +60,13 @@
 
         <main class="main-content">
             <header class="top-header">
-                <h2 class="page-title">Panel Administrativo</h2>
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <button class="mobile-team-btn" onclick="window.Social.toggleTeamSidebar()" aria-label="Ver Equipo" title="Equipo">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Abrir menú">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                     </button>
+                    <h2 class="page-title" id="pageTitle">Panel de Administración</h2>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <button class="btn-icon" onclick="location.reload()" aria-label="Actualizar Página" title="Actualizar">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.21L21.5 8"></path></svg>
                     </button>
@@ -78,92 +80,74 @@
             </header>
 
             <div class="content-area">
-                
-                <!-- MURO SOCIAL -->
-                <div id="dash-muro" class="tab-content">
-                    <div class="create-post-card">
-                        <h3 style="margin-bottom: 1rem;">Publicar en el Muro</h3>
-                        <form id="formCreatePost">
-                            <textarea id="postContent" placeholder="Anuncia algo a todo el equipo..." required></textarea>
-                            <div id="postImagePreview" style="display:none;"></div>
-                            <div class="create-post-actions">
-                                <button type="button" class="action-btn" onclick="document.getElementById('postImageInput').click()" style="color: var(--brand-secondary);">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                                    Adjuntar Foto
-                                </button>
-                                <input type="file" id="postImageInput" accept="image/*" style="display:none">
-                                <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1.5rem;">Publicar</button>
-                            </div>
-                        </form>
-                    </div>
-                    
-                    <div id="feedContainer">
-                        <!-- Posts se cargan dinámicamente -->
-                    </div>
-                </div>
-
-                <!-- RESUMEN FLOTA -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon" style="color: var(--brand-secondary); background-color: rgba(59,130,246,0.1);">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="statViajes" style="display: flex; align-items: center; gap: 0.5rem;">0</h3>
-                            <p>Viajes este mes</p>
-                            <span id="trendViajes" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="color: var(--accent-warning); background-color: rgba(245, 158, 11, 0.1);">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="statCantMantenciones" style="display: flex; align-items: center; gap: 0.5rem;">0</h3>
-                            <p>Mantenciones este mes</p>
-                            <span id="trendCantMant" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="color: var(--accent-danger); background-color: rgba(239,68,68,0.1);">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22v-8c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v8"></path><path d="M12 12v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6"></path><circle cx="12" cy="18" r="2"></circle></svg>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="statCombustible" style="display: flex; align-items: center; gap: 0.5rem;">$0</h3>
-                            <p>Gasto Combustible</p>
-                            <span id="trendCombustible" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="color: var(--accent-warning); background-color: rgba(245, 158, 11, 0.1);">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="statMantencion" style="display: flex; align-items: center; gap: 0.5rem;">$0</h3>
-                            <p>Gasto Mantención</p>
-                            <span id="trendMantencion" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="color: var(--brand-primary); background-color: rgba(16, 185, 129, 0.1);">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                        </div>
-                        <div class="stat-info">
-                            <h3 id="statOtrosGastos" style="display: flex; align-items: center; gap: 0.5rem;">$0</h3>
-                            <p>Otros (Peajes, Viáticos)</p>
-                            <span id="trendOtros" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- INICIO DEL DUEÑO -->
                 <div id="dash-inicio" class="tab-content active">
-                    <div class="card">
+                    <div class="card" style="margin-bottom: 1.5rem;">
                         <div class="card-header">
                             <h3 class="card-title" style="font-size: 1.5rem;">Hola, <span id="dashOwnerName">Administrador</span> 👋</h3>
                         </div>
-                        <div style="padding: 0 0.5rem 1rem;">
-                            <p style="color: var(--text-secondary); margin-bottom: 1.75rem;">¿Qué registros deseas revisar hoy?</p>
+                        <div style="padding: 0 0.5rem 0.5rem;">
+                            <p style="color: var(--text-secondary);">Bienvenido al resumen general de tu flota.</p>
+                        </div>
+                    </div>
+
+                    <h4 style="margin-bottom: 1rem; color: var(--text-primary); font-size: 1.05rem;">Rendimiento del Mes</h4>
+                    <!-- RESUMEN FLOTA -->
+                    <div class="stats-grid" style="margin-bottom: 2rem;">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="color: var(--brand-secondary); background-color: rgba(59,130,246,0.1);">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="statViajes" style="display: flex; align-items: center; gap: 0.5rem;">0</h3>
+                                <p>Viajes este mes</p>
+                                <span id="trendViajes" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="color: var(--accent-warning); background-color: rgba(245, 158, 11, 0.1);">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="statCantMantenciones" style="display: flex; align-items: center; gap: 0.5rem;">0</h3>
+                                <p>Mantenciones este mes</p>
+                                <span id="trendCantMant" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="color: var(--accent-danger); background-color: rgba(239,68,68,0.1);">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22v-8c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v8"></path><path d="M12 12v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6"></path><circle cx="12" cy="18" r="2"></circle></svg>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="statCombustible" style="display: flex; align-items: center; gap: 0.5rem;">$0</h3>
+                                <p>Gasto Combustible</p>
+                                <span id="trendCombustible" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="color: var(--accent-warning); background-color: rgba(245, 158, 11, 0.1);">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="statMantencion" style="display: flex; align-items: center; gap: 0.5rem;">$0</h3>
+                                <p>Gasto Mantención</p>
+                                <span id="trendMantencion" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
+                            </div>
+                        </div>
+                        <div class="stat-card" style="grid-column: 1 / -1;">
+                            <div class="stat-icon" style="color: var(--brand-primary); background-color: rgba(16, 185, 129, 0.1);">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="statOtrosGastos" style="display: flex; align-items: center; gap: 0.5rem;">$0</h3>
+                                <p>Otros (Peajes, Viáticos)</p>
+                                <span id="trendOtros" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 style="margin-bottom: 1rem; color: var(--text-primary); font-size: 1.05rem;">Módulos de Gestión</h4>
                             
                             <div class="actions-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
                                 <button onclick="switchDashTab('reportes')" class="action-card">
@@ -346,34 +330,35 @@
                             </table>
                         </div>
                     </div>
+
+                    <div id="dash-usuarios" class="tab-content">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding: 1rem;">
+                            <h3 style="color: var(--text-primary);">Gestión de Usuarios</h3>
+                            <button class="btn btn-primary" onclick="openUserModal()">+ Crear Usuario</button>
+                        </div>
+                        <div class="table-container">
+                            <table id="tableUsuarios">
+                                <thead>
+                                    <tr>
+                                        <th>Usuario</th>
+                                        <th>Nombre Completo</th>
+                                        <th>Rol</th>
+                                        <th>Contraseña</th>
+                                        <th>Móvil</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Dinámico -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                 </div> <!-- fin tablesContainer -->
 
             </div>
         </main>
-
-        <aside class="right-sidebar">
-            <div class="right-sidebar-header">
-                <h3>Equipo SERFOVER</h3>
-            </div>
-            <div class="users-list" id="usersListContainer">
-                <p style="text-align: center; color: var(--text-secondary); margin-top: 2rem;">Cargando usuarios...</p>
-            </div>
-        </aside>
-    </div>
-
-    <!-- Floating Chat Window -->
-    <div id="chatWindow" class="chat-window">
-        <div class="chat-header">
-            <h4 id="chatTitle">Usuario</h4>
-            <button class="close-btn" onclick="window.Social.closeChat()" style="color: white; margin: 0; font-size: 1.5rem;">&times;</button>
-        </div>
-        <div class="chat-messages" id="chatMessages"></div>
-        <form id="formChat" class="chat-input-area">
-            <input type="text" id="chatInput" placeholder="Escribe un mensaje..." required autocomplete="off">
-            <button type="submit">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-            </button>
-        </form>
     </div>
 
     <!-- Modal Detalles -->
@@ -446,14 +431,104 @@
     <!-- Toast Notification Container -->
     <div id="toastContainer"></div>
 
+    <!-- Modal Masivo -->
+    <div id="massDeleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Eliminación Masiva</h3>
+                <button class="close-btn" onclick="closeMassDeleteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar estos registros? Esta acción no se puede deshacer.</p>
+                <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1.5rem;">
+                    <button class="btn btn-secondary" onclick="closeMassDeleteModal()">Cancelar</button>
+                    <button class="btn btn-danger" onclick="confirmMassDelete()">Eliminar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Gestión Usuario -->
+    <div id="userModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 id="userModalTitle">Crear Usuario</h3>
+                <button class="close-btn" onclick="closeUserModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm" class="form-grid">
+                    <input type="hidden" id="userOriginalUsername">
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Nombre de Usuario (Login)</label>
+                        <input type="text" id="userUsername" required placeholder="ej: juan123">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Nombre Completo</label>
+                        <input type="text" id="userName" required placeholder="Juan Pérez">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Contraseña</label>
+                        <input type="text" id="userPassword" required placeholder="Constraseña">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Rol</label>
+                        <select id="userRole" required>
+                            <option value="driver">Conductor</option>
+                            <option value="mechanic">Mecánico</option>
+                            <option value="owner">Administrador</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Móvil Asignado (Opcional)</label>
+                        <input type="text" id="userTruck" placeholder="Ej: Camión 1">
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1; margin-top: 1rem;">
+                        <button type="submit" class="btn btn-primary btn-block">Guardar Usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Librerías Externas -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 
-    <script src="app.js?v=13"></script>
-    <script src="api.js?v=13"></script>
-    <script src="social.js?v=1"></script>
-    <script src="dashboard.js?v=13"></script>
+    <script src="app.js?v=22"></script>
+    <script src="api.js?v=22"></script>
+    <script src="dashboard.js?v=22"></script>
+
+    <!-- SOCIAL CHAT -->
+    <button class="fab-chat" onclick="window.Social.toggleTeamSidebar()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+    </button>
+    <aside class="right-sidebar">
+        <div class="sidebar-header">
+            <h3>Comunidad</h3>
+            <button class="close-btn" onclick="window.Social.toggleTeamSidebar()">&times;</button>
+        </div>
+        <div class="sidebar-content">
+            <h4 style="padding: 1rem; margin: 0; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase;">Miembros</h4>
+            <div id="usersListContainer" class="users-list"></div>
+            <div style="padding: 1rem; text-align: center;">
+                <button class="btn btn-primary btn-block" onclick="window.Social.openChat()">Abrir Chat Grupal</button>
+            </div>
+        </div>
+    </aside>
+    <div id="chatWindow" class="chat-window">
+        <div class="chat-header">
+            <h3 id="chatTitle">Chat Grupal</h3>
+            <button class="close-btn" onclick="window.Social.closeChat()">&times;</button>
+        </div>
+        <div id="chatMessages" class="chat-messages"></div>
+        <form id="formChat" class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="Escribe un mensaje..." autocomplete="off">
+            <button type="submit" class="btn-icon" style="color: var(--brand-primary);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+        </form>
+    </div>
+    <script src="social.js?v=4"></script>
 </body>
 </html>

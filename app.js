@@ -252,4 +252,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // --- Mobile Menu Toggle ---
+    window.toggleMobileMenu = function() {
+        const sidebar = document.querySelector('.sidebar');
+        const overlay = document.querySelector('.sidebar-overlay');
+        
+        if (sidebar) {
+            sidebar.classList.toggle('open');
+        }
+        if (overlay) {
+            overlay.classList.toggle('active');
+        }
+    };
 });
