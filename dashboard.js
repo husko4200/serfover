@@ -17,6 +17,11 @@ function switchDashTab(tabId) {
     // Activar en el sidebar (menú lateral) si existe un elemento
     const activeNav = Array.from(document.querySelectorAll('.nav-item')).find(el => el.getAttribute('onclick') === `switchDashTab('${tabId}')`);
     if(activeNav) activeNav.classList.add('active');
+
+    // Activar botón bottom nav (Mobile HUD)
+    document.querySelectorAll('.bnav-item').forEach(el => el.classList.remove('active'));
+    const activeBnav = Array.from(document.querySelectorAll('.bnav-item')).find(el => el.getAttribute('data-tab') === tabId);
+    if(activeBnav) activeBnav.classList.add('active');
 }
 
 // Modal functions
@@ -188,10 +193,10 @@ async function loadData() {
         const alertsContainer = document.getElementById('ownerAlertsContainer');
         if (alertsContainer) {
             // Limpiar alertas
-            const existingAlerts = alertsContainer.querySelectorAll('.alert-box');
-            existingAlerts.forEach(el => el.remove());
+            alertsContainer.innerHTML = '';
 
             let hasAlerts = false;
+            let alertCount = 0;
 
             // 1. Alertas de Aceite y Actividad
             const today = new Date();
@@ -215,13 +220,15 @@ async function loadData() {
                 if (!d || d === 'Dueño' || d.startsWith('Mecánico') || d === 'Mecanico') return;
                 if (!activeDrivers.has(d)) {
                     hasAlerts = true;
+                    alertCount++;
                     const alertDiv = document.createElement('div');
                     alertDiv.className = 'alert-box';
                     alertDiv.style.padding = '1rem';
                     alertDiv.style.borderRadius = 'var(--radius-md)';
                     alertDiv.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
                     alertDiv.style.color = 'var(--accent-danger)';
-                    alertDiv.style.border = '1px solid var(--accent-danger)';
+                    alertDiv.style.border = '1px solid rgba(239, 68, 68, 0.2)';
+                    alertDiv.style.fontSize = '0.9rem';
                     alertDiv.innerHTML = `⚠️ ATENCIÓN - El conductor <strong>${d}</strong> no ha subido reportes en los últimos 3 días.`;
                     alertsContainer.appendChild(alertDiv);
                 }
@@ -232,21 +239,22 @@ async function loadData() {
                     const diff = truck.maxKm - truck.lastOilKm;
                     if (diff >= 14000) {
                         hasAlerts = true;
+                        alertCount++;
                         const alertDiv = document.createElement('div');
                         alertDiv.className = 'alert-box';
                         alertDiv.style.padding = '1rem';
                         alertDiv.style.borderRadius = 'var(--radius-md)';
-                        alertDiv.style.fontWeight = 'bold';
+                        alertDiv.style.fontSize = '0.9rem';
                         
                         if (diff >= 15000) {
                             alertDiv.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
                             alertDiv.style.color = 'var(--accent-danger)';
-                            alertDiv.style.border = '1px solid var(--accent-danger)';
+                            alertDiv.style.border = '1px solid rgba(239, 68, 68, 0.2)';
                             alertDiv.innerHTML = `🚨 URGENTE - Camión <strong>${truck.movil}</strong>: Han pasado ${diff.toLocaleString('es-CL')} km desde el último cambio de aceite (Límite 15.000).`;
                         } else {
                             alertDiv.style.backgroundColor = 'rgba(245, 158, 11, 0.1)';
                             alertDiv.style.color = 'var(--accent-warning)';
-                            alertDiv.style.border = '1px solid var(--accent-warning)';
+                            alertDiv.style.border = '1px solid rgba(245, 158, 11, 0.2)';
                             alertDiv.innerHTML = `⚠️ AVISO - Camión <strong>${truck.movil}</strong>: Han pasado ${diff.toLocaleString('es-CL')} km desde el último cambio de aceite. Prepárese para cambio a los 15.000 km.`;
                         }
                         alertsContainer.appendChild(alertDiv);
@@ -257,6 +265,7 @@ async function loadData() {
             // 2. Últimas 3 Mantenciones Recientes
             if (filteredMant && filteredMant.length > 0) {
                 hasAlerts = true;
+                alertCount++;
                 const recentMants = filteredMant.slice(0, 3);
                 
                 const mantDiv = document.createElement('div');
@@ -264,9 +273,9 @@ async function loadData() {
                 mantDiv.style.padding = '1rem';
                 mantDiv.style.borderRadius = 'var(--radius-md)';
                 mantDiv.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
-                mantDiv.style.border = '1px solid var(--brand-secondary)';
+                mantDiv.style.border = '1px solid rgba(59, 130, 246, 0.2)';
                 
-                let mantHtml = `<h5 style="color: var(--brand-secondary); margin-bottom: 0.5rem; font-size: 0.95rem;">Últimas Mantenciones Registradas:</h5><ul style="list-style: none; padding: 0; margin: 0; font-size: 0.9rem;">`;
+                let mantHtml = `<h5 style="color: var(--brand-secondary); margin-bottom: 0.5rem; font-size: 0.95rem;">Últimas Mantenciones Registradas:</h5><ul style="list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: var(--text-primary);">`;
                 
                 recentMants.forEach(m => {
                     const origen = (m.driver && m.driver.startsWith('Mecánico')) ? 'Mecánico' : 'Conductor';
@@ -281,12 +290,19 @@ async function loadData() {
                 alertsContainer.appendChild(mantDiv);
             }
 
-            if (hasAlerts) {
-                alertsContainer.style.display = 'flex';
-                document.getElementById('ownerAlertsTitle').style.display = 'block';
-            } else {
-                alertsContainer.style.display = 'none';
-                document.getElementById('ownerAlertsTitle').style.display = 'none';
+            const notifBadge = document.getElementById('notifBadge');
+            const notifCountText = document.getElementById('notifCountText');
+            
+            if (notifBadge && notifCountText) {
+                if (hasAlerts) {
+                    notifBadge.style.display = 'flex';
+                    notifBadge.textContent = alertCount;
+                    notifCountText.textContent = alertCount;
+                } else {
+                    notifBadge.style.display = 'none';
+                    notifCountText.textContent = '0';
+                    alertsContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 1rem 0;">No hay notificaciones</div>';
+                }
             }
         }
 
@@ -547,6 +563,16 @@ async function loadData() {
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
+});
+
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('notifDropdown');
+    const bell = document.querySelector('button[aria-label="Notificaciones"]');
+    if (dropdown && dropdown.style.display === 'block') {
+        if (!dropdown.contains(e.target) && !bell.contains(e.target)) {
+            dropdown.style.display = 'none';
+        }
+    }
 });
 window.verReporte = function(index) {
     const rep = window.currentData.reportes[index];
@@ -843,11 +869,19 @@ window.loadUsersTable = function() {
         // Security check: don't allow deleting the first owner (usually the main admin) if it's the only one
         const isDeleteDisabled = (u.role === 'owner' && users.filter(x => x.role === 'owner').length === 1);
 
+        const pwdId = `pwd-${i}`;
         tr.innerHTML = `
             <td data-label="Usuario"><strong>${u.username}</strong></td>
             <td data-label="Nombre">${u.name}</td>
             <td data-label="Rol"><span class="badge ${roleClass}" style="padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); font-size: 0.75rem; background: var(--surface-hover);">${roleDisplay}</span></td>
-            <td data-label="Contraseña"><span style="filter: blur(4px); transition: filter 0.2s; cursor: pointer;" onmouseover="this.style.filter='none'" onmouseout="this.style.filter='blur(4px)'">${u.password}</span></td>
+            <td data-label="Contraseña">
+                <div class="pwd-cell">
+                    <span id="${pwdId}" data-pwd="${u.password}">••••••</span>
+                    <button class="pwd-reveal-btn" onclick="togglePwdReveal('${pwdId}')" title="Mostrar/ocultar contraseña">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+            </td>
             <td data-label="Móvil">${u.truck || '-'}</td>
             <td data-label="Acciones">
                 <button class="view-btn" onclick="openUserModal('${u.username}')" style="background: rgba(59,130,246,0.1); color: var(--brand-secondary); margin-right: 0.5rem;">Editar</button>
@@ -965,3 +999,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 });
+
+/**
+ * Toggle password reveal in users table.
+ * @param {string} spanId - ID of the span element
+ */
+window.togglePwdReveal = function(spanId) {
+    const span = document.getElementById(spanId);
+    if (!span) return;
+    const realPwd = span.dataset.pwd;
+    const isHidden = span.textContent === '••••••';
+    span.textContent = isHidden ? realPwd : '••••••';
+};

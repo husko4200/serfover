@@ -15,6 +15,11 @@ function switchMechTab(tabId) {
     const activeNav = Array.from(document.querySelectorAll('.nav-item')).find(el => el.getAttribute('onclick') === `switchMechTab('${tabId}')`);
     if(activeNav) activeNav.classList.add('active');
 
+    // Activar botón bottom nav (Mobile HUD)
+    document.querySelectorAll('.bnav-item').forEach(el => el.classList.remove('active'));
+    const activeBnav = Array.from(document.querySelectorAll('.bnav-item')).find(el => el.getAttribute('data-tab') === tabId);
+    if(activeBnav) activeBnav.classList.add('active');
+
     const titles = {
         'inicio': 'Panel de Inicio',
         'muro': 'Muro del Equipo',
@@ -125,21 +130,19 @@ function checkFleetAlerts(data) {
                 hasAlerts = true;
                 alertCount++;
                 const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert-box';
-                alertDiv.style.padding = '1rem';
-                alertDiv.style.borderRadius = 'var(--radius-md)';
-                alertDiv.style.fontWeight = 'bold';
                 
                 if (diff >= 40000) {
-                    alertDiv.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-                    alertDiv.style.color = 'var(--accent-danger)';
-                    alertDiv.style.border = '1px solid var(--accent-danger)';
-                    alertDiv.innerHTML = `🚨 URGENTE - Camión <strong>${truck.movil}</strong>: Han pasado ${diff.toLocaleString('es-CL')} km desde el último cambio de aceite (Límite 40.000).`;
+                    alertDiv.className = 'alert-cockpit alert-cockpit--critical';
+                    alertDiv.innerHTML = `
+                        <div class="alert-label">CRÍTICO: Cambio de Aceite</div>
+                        <p style="color: var(--text-primary);">Camión <strong>${truck.movil}</strong>: Han pasado ${diff.toLocaleString('es-CL')} km desde el último cambio (Límite 40.000).</p>
+                    `;
                 } else {
-                    alertDiv.style.backgroundColor = 'rgba(245, 158, 11, 0.1)';
-                    alertDiv.style.color = 'var(--accent-warning)';
-                    alertDiv.style.border = '1px solid var(--accent-warning)';
-                    alertDiv.innerHTML = `⚠️ AVISO - Camión <strong>${truck.movil}</strong>: Han pasado ${diff.toLocaleString('es-CL')} km desde el último cambio de aceite. Prepárese para cambio a los 40.000 km.`;
+                    alertDiv.className = 'alert-cockpit';
+                    alertDiv.innerHTML = `
+                        <div class="alert-label">ADVERTENCIA: Mantención Próxima</div>
+                        <p style="color: var(--text-primary);">Camión <strong>${truck.movil}</strong>: Han pasado ${diff.toLocaleString('es-CL')} km desde el último cambio. Prepárese para cambio a los 40.000 km.</p>
+                    `;
                 }
                 alertsContainer.appendChild(alertDiv);
             }
@@ -330,8 +333,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('formMantencionMech').addEventListener('submit', async (e) => {
         e.preventDefault();
         const statusEl = document.getElementById('mantStatusMech');
-        statusEl.style.display = 'block';
-        statusEl.innerHTML = '<span style="color: var(--brand-primary);">Guardando...</span>';
+        statusEl.style.display = 'none';
+        window.setBtnLoading('btnSubmitMantMech', true);
 
         const user = JSON.parse(localStorage.getItem('serfover_user'));
 
@@ -352,15 +355,16 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             await API.sendData(payload);
-            
-            statusEl.innerHTML = '<span style="color: var(--accent-success);">¡Mantención registrada con éxito!</span>';
+            window.setBtnLoading('btnSubmitMantMech', false, 'Registrar Mantención');
+            showToast('¡Mantención registrada con éxito!', 'success');
             document.getElementById('formMantencionMech').reset();
             document.getElementById('mantPreviewMech').style.display = 'none';
             
             // Recargar datos
             loadMechanicData();
         } catch (error) {
-            statusEl.innerHTML = '<span style="color: var(--accent-danger);">Error al guardar: ' + error.message + '</span>';
+            window.setBtnLoading('btnSubmitMantMech', false, 'Registrar Mantención');
+            showToast('Error al guardar: ' + error.message, 'error');
         }
     });
 });

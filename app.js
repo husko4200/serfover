@@ -266,3 +266,100 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 });
+
+// =====================================================
+// GLOBAL UTILS (available outside DOMContentLoaded)
+// =====================================================
+
+/**
+ * Toggle password field visibility with eye icon animation.
+ * @param {string} inputId - The input element ID
+ * @param {HTMLElement} btn - The toggle button element
+ */
+window.togglePasswordVisibility = function(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const isPassword = input.type === 'password';
+    input.type = isPassword ? 'text' : 'password';
+    // Toggle icon: eye vs eye-off
+    btn.innerHTML = isPassword
+        ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+               <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+               <line x1="1" y1="1" x2="23" y2="23"/>
+           </svg>`
+        : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+               <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+               <circle cx="12" cy="12" r="3"/>
+           </svg>`;
+    btn.title = isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña';
+};
+
+/**
+ * Set a submit button into loading state.
+ * @param {string} btnId - button element id
+ * @param {boolean} loading - true=loading, false=restore
+ * @param {string} originalText - text to restore when loading=false
+ */
+window.setBtnLoading = function(btnId, loading, originalText) {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    if (loading) {
+        btn.classList.add('btn--loading');
+        btn.disabled = true;
+    } else {
+        btn.classList.remove('btn--loading');
+        btn.disabled = false;
+        if (originalText) {
+            const span = btn.querySelector('span');
+            if (span) span.textContent = originalText;
+        }
+    }
+};
+
+/**
+ * Show a toast notification.
+ * @param {string} message
+ * @param {'success'|'error'|'info'|'warning'} type
+ */
+window.showToast = window.showToast || function(message, type = 'success') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    const colors = {
+        success: { bg: 'rgba(16,185,129,0.15)', border: 'rgba(16,185,129,0.35)', text: '#10b981' },
+        error:   { bg: 'rgba(239,68,68,0.15)',  border: 'rgba(239,68,68,0.35)',  text: '#ef4444' },
+        warning: { bg: 'rgba(245,158,11,0.15)', border: 'rgba(245,158,11,0.35)', text: '#f59e0b' },
+        info:    { bg: 'rgba(59,130,246,0.15)', border: 'rgba(59,130,246,0.35)', text: '#3b82f6' }
+    };
+    const c = colors[type] || colors.info;
+    const icons = {
+        success: '✓',
+        error: '✗',
+        warning: '⚠',
+        info: 'ℹ'
+    };
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        display: flex; align-items: center; gap: 0.65rem;
+        padding: 0.8rem 1.1rem; border-radius: 14px;
+        background: ${c.bg}; border: 1px solid ${c.border};
+        color: ${c.text}; font-size: 0.9rem; font-weight: 500;
+        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+        transform: translateX(120%); opacity: 0;
+        transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+        font-family: var(--font-family); max-width: 320px; min-width: 200px;
+    `;
+    toast.innerHTML = `<span style="font-size:1rem;">${icons[type] || ''}</span><span>${message}</span>`;
+    container.appendChild(toast);
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            toast.style.transform = 'translateX(0)';
+            toast.style.opacity = '1';
+        });
+    });
+    setTimeout(() => {
+        toast.style.transform = 'translateX(120%)';
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 400);
+    }, 3500);
+};

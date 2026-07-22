@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=13">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="app-container">
@@ -242,7 +242,7 @@
                             </div>
 
                             <div style="grid-column: 1 / -1;">
-                                <button type="submit" class="btn btn-primary">Registrar Mantención</button>
+                                <button type="submit" class="btn btn-primary" id="btnSubmitMantMech"><span>Registrar Mantención</span></button>
                                 <div id="mantStatusMech" style="margin-top: 1rem; display: none;"></div>
                             </div>
                         </form>
@@ -289,7 +289,12 @@
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Contraseña</label>
-                        <input type="text" id="profilePassword" required>
+                        <div class="password-wrapper">
+                            <input type="password" id="profilePassword" required autocomplete="current-password">
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('profilePassword', this)" aria-label="Mostrar/ocultar contraseña">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                            </button>
+                        </div>
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Apodo / Nombre Visible</label>
@@ -297,7 +302,8 @@
                     </div>
                     
                     <div style="grid-column: 1 / -1;">
-                        <button type="submit" class="btn btn-primary" style="width: 100%;">Guardar Cambios</button>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 0.5rem;">Guardar Cambios</button>
+                        <button type="button" class="btn btn-secondary" onclick="document.getElementById('logoutBtn').click()" style="width: 100%; background: rgba(239, 68, 68, 0.1); color: var(--accent-danger); border-color: var(--accent-danger);">Cerrar Sesión</button>
                         <div id="profileStatus" style="margin-top: 1rem; text-align: center; display: none;"></div>
                     </div>
                 </form>
@@ -305,9 +311,32 @@
         </div>
     </div>
 
-    <script src="app.js?v=15"></script>
-    <script src="api.js?v=15"></script>
-    <script src="mechanic.js?v=15"></script>
+    <!-- Bottom Nav HUD (Mobile) -->
+    <nav class="bottom-nav" id="bottomNav">
+        <button class="bnav-item active" onclick="switchMechTab('inicio')" data-tab="inicio">
+            <svg width="22" height="22" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>Inicio</span>
+        </button>
+        <button class="bnav-item" onclick="switchMechTab('mantencion')" data-tab="mantencion">
+            <svg width="22" height="22" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            <span>Mantención</span>
+        </button>
+        <button class="bnav-item" onclick="switchMechTab('historial')" data-tab="historial">
+            <svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Historial</span>
+        </button>
+        <button class="bnav-item" onclick="openProfileModal()">
+            <div class="bnav-avatar" id="bnavAvatar">M</div>
+            <span>Perfil</span>
+        </button>
+    </nav>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer"></div>
+
+    <script src="app.js"></script>
+    <script src="api.js"></script>
+    <script src="mechanic.js"></script>
 
     <!-- SOCIAL CHAT -->
     <button class="fab-chat" onclick="window.Social.toggleTeamSidebar()">
@@ -339,6 +368,6 @@
             </button>
         </form>
     </div>
-    <script src="social.js?v=4"></script>
+    <script src="social.js"></script>
 </body>
 </html>

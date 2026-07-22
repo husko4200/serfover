@@ -7,9 +7,14 @@ function switchTab(tabId) {
     // Mostrar la seleccionada
     document.getElementById('tab-' + tabId).classList.add('active');
     
-    // Activar botón nav
+    // Activar botón nav (Desktop)
     const activeNav = Array.from(document.querySelectorAll('.nav-item')).find(el => el.getAttribute('onclick') === `switchTab('${tabId}')`);
     if(activeNav) activeNav.classList.add('active');
+
+    // Activar botón bottom nav (Mobile HUD)
+    document.querySelectorAll('.bnav-item').forEach(el => el.classList.remove('active'));
+    const activeBnav = Array.from(document.querySelectorAll('.bnav-item')).find(el => el.getAttribute('data-tab') === tabId);
+    if(activeBnav) activeBnav.classList.add('active');
 
     // Cambiar título
     const titles = {
@@ -22,6 +27,38 @@ function switchTab(tabId) {
         'historial-mant': 'Mis Mantenciones'
     };
     document.getElementById('pageTitle').textContent = titles[tabId] || 'Panel';
+}
+
+// Lógica del Stepper (Formulario de Reporte)
+function nextStep(stepNumber) {
+    // Validar inputs del step actual antes de avanzar
+    const currentStep = document.querySelector('.stepper-step.active');
+    const inputs = currentStep.querySelectorAll('input[required], select[required], textarea[required]');
+    let isValid = true;
+    inputs.forEach(input => {
+        if (!input.checkValidity()) {
+            input.reportValidity();
+            isValid = false;
+        }
+    });
+    
+    if (!isValid) return;
+
+    // Cambiar step activo
+    document.querySelectorAll('.stepper-step').forEach(el => el.classList.remove('active'));
+    document.getElementById('step' + stepNumber).classList.add('active');
+    
+    // Actualizar barra de progreso (33%, 66%, 100%)
+    const progress = (stepNumber / 3) * 100;
+    document.getElementById('stepperBar').style.width = progress + '%';
+}
+
+function prevStep(stepNumber) {
+    document.querySelectorAll('.stepper-step').forEach(el => el.classList.remove('active'));
+    document.getElementById('step' + stepNumber).classList.add('active');
+    
+    const progress = (stepNumber / 3) * 100;
+    document.getElementById('stepperBar').style.width = progress + '%';
 }
 
 function previewImage(input, previewContainerId) {
@@ -692,8 +729,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('formReporte').addEventListener('submit', async (e) => {
         e.preventDefault();
         const statusEl = document.getElementById('repStatus');
-        statusEl.style.display = 'block';
-        statusEl.innerHTML = '<span style="color: var(--brand-primary);">Guardando...</span>';
+        statusEl.style.display = 'none';
+        window.setBtnLoading('btnSubmitReporte', true);
 
         try {
             const imageFile = document.getElementById('repImagen').files[0];
@@ -718,12 +755,17 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             await API.sendData(payload);
-            
-            statusEl.innerHTML = '<span style="color: var(--accent-success);">¡Reporte guardado con éxito!</span>';
+            window.setBtnLoading('btnSubmitReporte', false, 'Guardar Reporte');
+            showToast('¡Reporte guardado con éxito!', 'success');
             document.getElementById('formReporte').reset();
             document.getElementById('repPreview').style.display = 'none';
+            // Restaurar móvil desde perfil
+            if (user && user.truck) document.getElementById('repMovil').value = user.truck;
         } catch (error) {
-            statusEl.innerHTML = '<span style="color: var(--accent-danger);">Error al guardar: ' + error.message + '</span>';
+            window.setBtnLoading('btnSubmitReporte', false, 'Guardar Reporte');
+            showToast('Error al guardar: ' + error.message, 'error');
+            statusEl.style.display = 'block';
+            statusEl.innerHTML = '<span style="color: var(--accent-danger);">Error al guardar. Intenta nuevamente.</span>';
         }
     });
 
@@ -731,8 +773,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('formCombustible').addEventListener('submit', async (e) => {
         e.preventDefault();
         const statusEl = document.getElementById('combStatus');
-        statusEl.style.display = 'block';
-        statusEl.innerHTML = '<span style="color: var(--brand-primary);">Guardando...</span>';
+        statusEl.style.display = 'none';
+        window.setBtnLoading('btnSubmitCombustible', true);
 
         try {
             const imageFile = document.getElementById('combImagen').files[0];
@@ -749,12 +791,13 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             await API.sendData(payload);
-            
-            statusEl.innerHTML = '<span style="color: var(--accent-success);">¡Combustible registrado con éxito!</span>';
+            window.setBtnLoading('btnSubmitCombustible', false, 'Registrar Combustible');
+            showToast('¡Combustible registrado con éxito!', 'success');
             document.getElementById('formCombustible').reset();
             document.getElementById('combPreview').style.display = 'none';
         } catch (error) {
-            statusEl.innerHTML = '<span style="color: var(--accent-danger);">Error al guardar: ' + error.message + '</span>';
+            window.setBtnLoading('btnSubmitCombustible', false, 'Registrar Combustible');
+            showToast('Error al guardar: ' + error.message, 'error');
         }
     });
 
@@ -762,8 +805,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('formMantencion').addEventListener('submit', async (e) => {
         e.preventDefault();
         const statusEl = document.getElementById('mantStatus');
-        statusEl.style.display = 'block';
-        statusEl.innerHTML = '<span style="color: var(--brand-primary);">Guardando...</span>';
+        statusEl.style.display = 'none';
+        window.setBtnLoading('btnSubmitMantencion', true);
 
         try {
             const imageFile = document.getElementById('mantImagen').files[0];
@@ -781,12 +824,13 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             await API.sendData(payload);
-            
-            statusEl.innerHTML = '<span style="color: var(--accent-success);">¡Mantención registrada con éxito!</span>';
+            window.setBtnLoading('btnSubmitMantencion', false, 'Registrar Mantención');
+            showToast('¡Mantención registrada con éxito!', 'success');
             document.getElementById('formMantencion').reset();
             document.getElementById('mantPreview').style.display = 'none';
         } catch (error) {
-            statusEl.innerHTML = '<span style="color: var(--accent-danger);">Error al guardar: ' + error.message + '</span>';
+            window.setBtnLoading('btnSubmitMantencion', false, 'Registrar Mantención');
+            showToast('Error al guardar: ' + error.message, 'error');
         }
     });
 });
