@@ -1,17 +1,32 @@
 // Lógica del Dashboard del Dueño
 
 function switchDashTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(el => {
+        el.classList.remove('active');
+        el.style.display = 'none'; // Force hide
+    });
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     
     const tablesContainer = document.getElementById('tablesContainer');
     if (tabId === 'inicio') {
         if(tablesContainer) tablesContainer.style.display = 'none';
-        document.getElementById('dash-inicio').classList.add('active');
+        const dInicio = document.getElementById('dash-inicio');
+        if(dInicio) {
+            dInicio.classList.add('active');
+            dInicio.style.display = 'block';
+        }
     } else {
         if(tablesContainer) tablesContainer.style.display = 'block';
-        document.getElementById('dash-inicio').classList.remove('active');
-        document.getElementById('dash-' + tabId).classList.add('active');
+        const dInicio = document.getElementById('dash-inicio');
+        if(dInicio) {
+            dInicio.classList.remove('active');
+            dInicio.style.display = 'none';
+        }
+        const targetDash = document.getElementById('dash-' + tabId);
+        if(targetDash) {
+            targetDash.classList.add('active');
+            targetDash.style.display = 'block';
+        }
     }
     
     // Activar en el sidebar (menú lateral) si existe un elemento
@@ -339,6 +354,9 @@ async function loadData() {
             tbodyComb.innerHTML = '';
             filteredComb.forEach((comb, i) => {
                 const tr = document.createElement('tr');
+                const isApproved = localStorage.getItem('approved_comb_' + i) === 'true';
+                if (isApproved) tr.style.backgroundColor = 'rgba(16, 185, 129, 0.05)';
+                
                 tr.innerHTML = `
                     <td data-label="Fecha">${formatDate(comb.fecha)}</td>
                     <td data-label="Conductor"><span class="driver-badge">${comb.driver}</span></td>
@@ -346,7 +364,10 @@ async function loadData() {
                     <td data-label="Litros">${comb.litros} L</td>
                     <td data-label="Kilometraje">${comb.kilometraje} km</td>
                     <td data-label="Costo"><span style="color:var(--accent-danger);">${formatMoney(comb.valor)}</span></td>
-                    <td data-label="Acción"><button class="view-btn" onclick="verCombustible(${i})">Ver</button></td>
+                    <td data-label="Acción" style="display: flex; gap: 0.5rem; justify-content: center;">
+                        <button class="view-btn" onclick="verCombustible(${i})">Ver</button>
+                        ${!isApproved ? `<button class="btn btn-secondary" onclick="approveExpense('comb', ${i}, this)" style="padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; background: rgba(16,185,129,0.1); border-color: var(--brand-primary); color: var(--brand-primary);">✅ Aprobar</button>` : ''}
+                    </td>
                 `;
                 tbodyComb.appendChild(tr);
             });
@@ -365,14 +386,20 @@ async function loadData() {
                 }
 
                 const tr = document.createElement('tr');
+                const isApproved = localStorage.getItem('approved_mant_' + i) === 'true';
+                if (isApproved) tr.style.backgroundColor = 'rgba(16, 185, 129, 0.05)';
+                
                 tr.innerHTML = `
                     <td data-label="Fecha">${formatDate(mant.fecha)}</td>
-                    <td data-label="Conductor"><span class="driver-badge">${mant.driver}</span></td>
+                    <td data-label="Conductor"><span class="driver-badge" style="background-color: ${origenColor}20; color: ${origenColor}; border-color: ${origenColor}40;">${origen}</span></td>
                     <td data-label="Móvil"><strong>${mant._movil}</strong></td>
-                    <td data-label="Origen"><span style="color: ${origenColor}; font-weight: bold; font-size: 0.8rem; border: 1px solid ${origenColor}; padding: 0.2rem 0.4rem; border-radius: 4px;">${origen}</span></td>
-                    <td data-label="Descripción">${mant.descripcion.substring(0, 40)}...</td>
+                    <td data-label="Tipo">${mant.tipo}</td>
+                    <td data-label="Descripción"><span style="font-size:0.85rem;">${mant.descripcion ? mant.descripcion.substring(0, 40) + '...' : '-'}</span></td>
                     <td data-label="Costo"><span style="color:var(--accent-danger);">${formatMoney(mant.valor)}</span></td>
-                    <td data-label="Acción"><button class="view-btn" onclick="verMantencion(${i})">Ver</button></td>
+                    <td data-label="Acción" style="display: flex; gap: 0.5rem; justify-content: center;">
+                        <button class="view-btn" onclick="verMantencion(${i})">Ver</button>
+                        ${(!isApproved && parseFloat(mant.valor) > 0) ? `<button class="btn btn-secondary" onclick="approveExpense('mant', ${i}, this)" style="padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.8rem; background: rgba(16,185,129,0.1); border-color: var(--brand-primary); color: var(--brand-primary);">✅ Aprobar</button>` : ''}
+                    </td>
                 `;
                 tbodyMant.appendChild(tr);
             });
@@ -460,6 +487,180 @@ async function loadData() {
 
         document.getElementById('statOtrosGastos').textContent = formatMoney(totalOtrosGastos);
         setTrend('trendOtros', totalOtrosGastos, prevOtrosGastos, true);
+
+        // --- Lógica de Business Intelligence (BI) y KPIs ---
+        try {
+            let currentLitros = 0, prevLitros = 0;
+            const truckKmMap = {};
+            const processKm = (item) => {
+                if(!item._movil) return;
+                const d = new Date(item.fecha);
+                const km = parseInt(item.kilometraje) || parseInt(item.km_final) || 0;
+                if(!truckKmMap[item._movil]) truckKmMap[item._movil] = { current: {min: Infinity, max: -Infinity, litros: 0, mantencion: 0}, prev: {min: Infinity, max: -Infinity, litros: 0, mantencion: 0} };
+                
+                if(km > 0) {
+                    if (d.getMonth() === currentMonthNum) {
+                        if(km < truckKmMap[item._movil].current.min) truckKmMap[item._movil].current.min = km;
+                        if(km > truckKmMap[item._movil].current.max) truckKmMap[item._movil].current.max = km;
+                    } else if (d.getMonth() === prevMonthNum) {
+                        if(km < truckKmMap[item._movil].prev.min) truckKmMap[item._movil].prev.min = km;
+                        if(km > truckKmMap[item._movil].prev.max) truckKmMap[item._movil].prev.max = km;
+                    }
+                }
+            };
+            
+            filteredReportes.forEach(processKm);
+            
+            filteredComb.forEach(comb => {
+                processKm(comb);
+                if(comb._movil && truckKmMap[comb._movil]) {
+                    const d = new Date(comb.fecha);
+                    const litros = parseFloat(comb.litros) || 0;
+                    if (d.getMonth() === currentMonthNum) {
+                        currentLitros += litros;
+                        truckKmMap[comb._movil].current.litros += litros;
+                    }
+                    else if (d.getMonth() === prevMonthNum) {
+                        prevLitros += litros;
+                        truckKmMap[comb._movil].prev.litros += litros;
+                    }
+                }
+            });
+
+            filteredMant.forEach(mant => {
+                if(mant._movil && truckKmMap[mant._movil]) {
+                    const d = new Date(mant.fecha);
+                    const valor = parseFloat(mant.valor) || 0;
+                    if (d.getMonth() === currentMonthNum) truckKmMap[mant._movil].current.mantencion += valor;
+                    else if (d.getMonth() === prevMonthNum) truckKmMap[mant._movil].prev.mantencion += valor;
+                }
+            });
+
+            let currentTotalKm = 0, prevTotalKm = 0;
+            const activeTrucksCurrent = new Set();
+            
+            // Anomalies logic
+            const alertsContainer = document.getElementById('ownerAlertsContainer');
+            let anomalyCount = 0;
+            
+            Object.keys(truckKmMap).forEach(movil => {
+                const data = truckKmMap[movil];
+                const cMin = data.current.min, cMax = data.current.max;
+                const pMin = data.prev.min, pMax = data.prev.max;
+                
+                let cKm = 0, pKm = 0;
+                if (cMin !== Infinity && cMax !== -Infinity && cMax >= cMin) {
+                    cKm = cMax - cMin;
+                    currentTotalKm += cKm;
+                    if (cKm > 0) activeTrucksCurrent.add(movil);
+                }
+                if (pMin !== Infinity && pMax !== -Infinity && pMax >= pMin) {
+                    pKm = pMax - pMin;
+                    prevTotalKm += pKm;
+                }
+
+                // Detect anomalies per truck
+                if (alertsContainer) {
+                    // Fuel anomaly
+                    const cRend = data.current.litros > 0 ? (cKm / data.current.litros) : 0;
+                    const pRend = data.prev.litros > 0 ? (pKm / data.prev.litros) : 0;
+                    
+                    if (cRend > 0 && pRend > 0) {
+                        const drop = (pRend - cRend) / pRend;
+                        if (drop >= 0.15) { // 15% drop in performance
+                            const alertDiv = document.createElement('div');
+                            alertDiv.className = 'alert-box';
+                            alertDiv.style.padding = '1rem';
+                            alertDiv.style.borderRadius = 'var(--radius-md)';
+                            alertDiv.style.backgroundColor = 'rgba(245, 158, 11, 0.1)';
+                            alertDiv.style.color = 'var(--accent-warning)';
+                            alertDiv.style.border = '1px solid rgba(245, 158, 11, 0.2)';
+                            alertDiv.style.fontSize = '0.9rem';
+                            alertDiv.innerHTML = `📉 ANOMALÍA - Camión <strong>${movil}</strong>: Rendimiento cayó un ${(drop*100).toFixed(1)}% vs mes pasado (${cRend.toFixed(2)} Km/L actual vs ${pRend.toFixed(2)} Km/L anterior).`;
+                            
+                            // If empty state text exists, clear it
+                            if(alertsContainer.innerHTML.includes('No hay notificaciones')) {
+                                alertsContainer.innerHTML = '';
+                            }
+                            alertsContainer.appendChild(alertDiv);
+                            anomalyCount++;
+                        }
+                    }
+
+                    // Maintenance cost anomaly
+                    if (data.current.mantencion > 1000000) { // Mayor a 1 millón
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert-box';
+                        alertDiv.style.padding = '1rem';
+                        alertDiv.style.borderRadius = 'var(--radius-md)';
+                        alertDiv.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                        alertDiv.style.color = 'var(--accent-danger)';
+                        alertDiv.style.border = '1px solid rgba(239, 68, 68, 0.2)';
+                        alertDiv.style.fontSize = '0.9rem';
+                        alertDiv.innerHTML = `💸 ALERTA FINANCIERA - Camión <strong>${movil}</strong>: Costo de mantención mensual excede $1.000.000 (${formatMoney(data.current.mantencion)}).`;
+                        
+                        if(alertsContainer.innerHTML.includes('No hay notificaciones')) {
+                            alertsContainer.innerHTML = '';
+                        }
+                        alertsContainer.appendChild(alertDiv);
+                        anomalyCount++;
+                    }
+                }
+            });
+
+            // Update badge if new anomalies were added
+            if (anomalyCount > 0) {
+                const notifBadge = document.getElementById('notifBadge');
+                const notifCountText = document.getElementById('notifCountText');
+                if (notifBadge && notifCountText) {
+                    const currentCount = parseInt(notifBadge.textContent) || 0;
+                    const newCount = currentCount + anomalyCount;
+                    notifBadge.style.display = 'flex';
+                    notifBadge.textContent = newCount;
+                    notifCountText.textContent = newCount;
+                }
+            }
+
+            // 1. CPK Global
+            const currentCostos = totalCombustible + totalMantencion + totalOtrosGastos;
+            const prevCostos = prevCombustible + prevMantencion + prevOtrosGastos;
+            
+            const currentCpk = currentTotalKm > 0 ? currentCostos / currentTotalKm : 0;
+            const prevCpk = prevTotalKm > 0 ? prevCostos / prevTotalKm : 0;
+            
+            if(document.getElementById('kpiCpk')) {
+                document.getElementById('kpiCpk').textContent = currentCpk > 0 ? formatMoney(Math.round(currentCpk)) : 'Sin datos';
+                setTrend('trendCpk', currentCpk, prevCpk, true);
+            }
+
+            // 2. Rendimiento Combustible
+            const currentRend = currentLitros > 0 ? (currentTotalKm / currentLitros) : 0;
+            const prevRend = prevLitros > 0 ? (prevTotalKm / prevLitros) : 0;
+            
+            if(document.getElementById('kpiRendimiento')) {
+                document.getElementById('kpiRendimiento').textContent = currentRend > 0 ? currentRend.toFixed(2) + ' Km/L' : 'Sin datos';
+                setTrend('trendRendimiento', currentRend, prevRend, false);
+            }
+
+            // 3. Disponibilidad de Flota
+            const totalTrucks = Object.keys(fleetMap).length;
+            const currentDisp = totalTrucks > 0 ? Math.round((activeTrucksCurrent.size / totalTrucks) * 100) : 0;
+            if(document.getElementById('kpiDisponibilidad')) {
+                document.getElementById('kpiDisponibilidad').textContent = totalTrucks > 0 ? currentDisp + '%' : 'Sin datos';
+                document.getElementById('trendDisponibilidad').textContent = `${activeTrucksCurrent.size} de ${totalTrucks} móviles operativos`;
+            }
+
+            // 4. Costo por Viaje
+            const currentCostxViaje = totalViajes > 0 ? currentCostos / totalViajes : 0;
+            const prevCostxViaje = prevViajes > 0 ? prevCostos / prevViajes : 0;
+            if(document.getElementById('kpiCostoViaje')) {
+                document.getElementById('kpiCostoViaje').textContent = currentCostxViaje > 0 ? formatMoney(Math.round(currentCostxViaje)) : 'Sin datos';
+                setTrend('trendCostoViaje', currentCostxViaje, prevCostxViaje, true);
+            }
+        } catch (e) {
+            console.error('Error calculando KPIs BI:', e);
+        }
+        // --- Fin Lógica BI ---
 
         // --- Render Rankings ---
         const topFuelTruck = Object.entries(truckFuelMap).sort((a, b) => b[1] - a[1])[0];
@@ -764,9 +965,6 @@ window.deleteRecord = function(type, id) {
     });
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    loadData();
-});
 
 window.descargarHojaRutaPDF = function(index, isOwner = true) {
     if (!window.jspdf || !window.jspdf.jsPDF) {
@@ -1011,3 +1209,65 @@ window.togglePwdReveal = function(spanId) {
     const isHidden = span.textContent === '••••••';
     span.textContent = isHidden ? realPwd : '••••••';
 };
+
+// --- Funciones UX Administrador ---
+window.filterReportsByTime = function(timeRange, btnElement) {
+    // Actualizar botones
+    document.querySelectorAll('#reportFilters .btn').forEach(b => b.classList.remove('active'));
+    if(btnElement) btnElement.classList.add('active');
+
+    if(!window.currentData || !window.currentData.reportes) return;
+    
+    let filtered = window.currentData.reportes;
+    const now = new Date();
+    
+    if(timeRange === 'today') {
+        filtered = filtered.filter(r => {
+            const d = new Date(r.fecha);
+            return d.getDate() === now.getDate() && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        });
+    } else if(timeRange === 'week') {
+        const firstDay = new Date(now.setDate(now.getDate() - now.getDay()));
+        filtered = filtered.filter(r => new Date(r.fecha) >= firstDay);
+    } else if(timeRange === 'month') {
+        filtered = filtered.filter(r => {
+            const d = new Date(r.fecha);
+            return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+        });
+    }
+    
+    const tbodyRep = document.querySelector('#tableReportes tbody');
+    if (tbodyRep) {
+        tbodyRep.innerHTML = '';
+        if(filtered.length === 0) {
+            tbodyRep.innerHTML = '<tr><td colspan="100%" style="text-align: center; padding: 2rem; color: var(--text-muted);">No hay reportes en este período.</td></tr>';
+            return;
+        }
+        
+        filtered.forEach((rep, i) => {
+            // Buscamos el index original para el modal
+            const originalIndex = window.currentData.reportes.indexOf(rep);
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td data-label="Fecha">${formatDate(rep.fecha)}</td>
+                <td data-label="Conductor"><span class="driver-badge">${rep.driver}</span></td>
+                <td data-label="Móvil"><strong>${rep._movil}</strong></td>
+                <td data-label="Destino">${rep.fundo} / ${rep.destino}</td>
+                <td data-label="N° Guía">${rep.guia || '-'}</td>
+                <td data-label="Acción"><button class="view-btn" onclick="verReporte(${originalIndex})">Ver</button></td>
+            `;
+            tbodyRep.appendChild(tr);
+        });
+    }
+}
+
+window.approveExpense = function(type, index, btnElement) {
+    if(confirm('¿Aprobar este gasto?')) {
+        localStorage.setItem(`approved_${type}_${index}`, 'true');
+        const tr = btnElement.closest('tr');
+        tr.style.backgroundColor = 'rgba(16, 185, 129, 0.05)';
+        btnElement.remove();
+        showToast('Gasto aprobado y marcado visualmente.', 'success');
+    }
+}
+

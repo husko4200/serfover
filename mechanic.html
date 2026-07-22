@@ -225,6 +225,27 @@
                                 <input type="number" id="mantKm" required>
                             </div>
                             <div class="form-group" style="grid-column: 1 / -1;">
+                                <label style="margin-bottom: 0.5rem; display:block;">Prioridad de Reparación</label>
+                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" id="prioritySelector">
+                                    <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--accent-danger); color:var(--text-primary); flex: 1;" onclick="setMechPriority('🔴 Urgente', this)">🔴 Urgente</button>
+                                    <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--accent-warning); color:var(--text-primary); flex: 1;" onclick="setMechPriority('🟡 Programable', this)">🟡 Programable</button>
+                                    <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--brand-primary); color:var(--text-primary); flex: 1;" onclick="setMechPriority('🟢 Menor', this)">🟢 Menor</button>
+                                </div>
+                                <!-- Hidden input to store priority -->
+                                <input type="hidden" id="mantPrioridad" value="">
+                            </div>
+
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label style="margin-bottom: 0.5rem; display:block;">Checklist Pre-operacional (Rápido)</label>
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem;" id="mechChecklist">
+                                    <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--text-secondary); color:var(--text-primary); text-align:left; padding:0.5rem;" onclick="toggleChecklist('Luces', this)">⚪ Luces</button>
+                                    <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--text-secondary); color:var(--text-primary); text-align:left; padding:0.5rem;" onclick="toggleChecklist('Neumáticos', this)">⚪ Neumáticos</button>
+                                    <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--text-secondary); color:var(--text-primary); text-align:left; padding:0.5rem;" onclick="toggleChecklist('Frenos', this)">⚪ Frenos</button>
+                                    <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--text-secondary); color:var(--text-primary); text-align:left; padding:0.5rem;" onclick="toggleChecklist('Aceite', this)">⚪ Aceite</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="grid-column: 1 / -1;">
                                 <label>Descripción Detallada / Repuestos</label>
                                 <textarea id="mantDesc" rows="3" required></textarea>
                             </div>

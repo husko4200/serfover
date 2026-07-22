@@ -342,13 +342,26 @@ document.addEventListener('DOMContentLoaded', () => {
             const imageFile = document.getElementById('mantImagenMech').files[0];
             const base64Image = await getBase64(imageFile);
 
+            // Recopilar prioridad y checklist
+            const prioridad = document.getElementById('mantPrioridad').value || 'Ninguna';
+            const checklistBtns = document.querySelectorAll('#mechChecklist .btn');
+            let checklistSummary = '';
+            checklistBtns.forEach(btn => {
+                const text = btn.innerText;
+                if(text.includes('✅') || text.includes('❌')) {
+                    checklistSummary += text + ' | ';
+                }
+            });
+
+            const finalDescription = `[Prioridad: ${prioridad}] ${checklistSummary ? '\\n[Checklist: ' + checklistSummary + ']' : ''}\\nMóvil: ${document.getElementById('mantMovil').value}. Conductor: ${document.getElementById('mantConductor').value || 'Desconocido'}. ` + document.getElementById('mantDesc').value;
+
             const payload = {
                 type: 'mantencion',
                 // Enviamos como driver el nombre del mecánico para asegurar el origen
                 driver: 'Mecánico - ' + (user ? user.name : 'Desc'),
                 tipo: document.getElementById('mantTipo').value,
                 kilometraje: document.getElementById('mantKm').value,
-                descripcion: `Móvil: ${document.getElementById('mantMovil').value}. Conductor: ${document.getElementById('mantConductor').value || 'Desconocido'}. ` + document.getElementById('mantDesc').value,
+                descripcion: finalDescription,
                 valor: 0, // Mecánico no ingresa costo
                 imagen: base64Image,
                 fecha: new Date().toISOString()
@@ -368,3 +381,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+// --- Funciones UX Mecánico ---
+function setMechPriority(priority, btn) {
+    document.getElementById('mantPrioridad').value = priority;
+    const parent = btn.parentElement;
+    parent.querySelectorAll('.btn').forEach(b => {
+        b.style.transform = 'scale(1)';
+        b.style.fontWeight = 'normal';
+    });
+    btn.style.transform = 'scale(1.05)';
+    btn.style.fontWeight = 'bold';
+}
+
+function toggleChecklist(itemName, btn) {
+    const currentText = btn.innerText;
+    if (currentText.includes('⚪')) {
+        btn.innerText = `✅ ${itemName}`;
+        btn.style.borderColor = 'var(--brand-primary)';
+        btn.style.background = 'rgba(16,185,129,0.1)';
+    } else if (currentText.includes('✅')) {
+        btn.innerText = `❌ ${itemName}`;
+        btn.style.borderColor = 'var(--accent-danger)';
+        btn.style.background = 'rgba(239,68,68,0.1)';
+    } else {
+        btn.innerText = `⚪ ${itemName}`;
+        btn.style.borderColor = 'var(--text-secondary)';
+        btn.style.background = 'var(--glass-bg)';
+    }
+}

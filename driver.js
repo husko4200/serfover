@@ -48,8 +48,8 @@ function nextStep(stepNumber) {
     document.querySelectorAll('.stepper-step').forEach(el => el.classList.remove('active'));
     document.getElementById('step' + stepNumber).classList.add('active');
     
-    // Actualizar barra de progreso (33%, 66%, 100%)
-    const progress = (stepNumber / 3) * 100;
+    // Actualizar barra de progreso (25%, 50%, 75%, 100%)
+    const progress = (stepNumber / 4) * 100;
     document.getElementById('stepperBar').style.width = progress + '%';
 }
 
@@ -57,7 +57,7 @@ function prevStep(stepNumber) {
     document.querySelectorAll('.stepper-step').forEach(el => el.classList.remove('active'));
     document.getElementById('step' + stepNumber).classList.add('active');
     
-    const progress = (stepNumber / 3) * 100;
+    const progress = (stepNumber / 4) * 100;
     document.getElementById('stepperBar').style.width = progress + '%';
 }
 
@@ -71,9 +71,47 @@ function previewImage(input, previewContainerId) {
         reader.onload = function(e) {
             img.src = e.target.result;
             container.style.display = 'block';
+            
+            // Habilitar botón de enviar si estamos en driver.html y es la imagen del reporte
+            const btnSubmit = document.getElementById('btnSubmitReporte');
+            if (btnSubmit && input.id === 'repImagen') {
+                btnSubmit.disabled = false;
+                btnSubmit.style.opacity = '1';
+                btnSubmit.style.cursor = 'pointer';
+            }
         }
         
         reader.readAsDataURL(input.files[0]);
+    } else {
+        // Si cancela, deshabilitar botón (opcional, pero buena práctica)
+        const btnSubmit = document.getElementById('btnSubmitReporte');
+        if (btnSubmit && input.id === 'repImagen') {
+            btnSubmit.disabled = true;
+            btnSubmit.style.opacity = '0.5';
+            btnSubmit.style.cursor = 'not-allowed';
+            container.style.display = 'none';
+        }
+    }
+}
+
+// Botones de estado rápido
+function setDriverStatus(statusText, btnElement) {
+    const obs = document.getElementById('repObservaciones');
+    if(obs) {
+        // Evitar duplicados del mismo estado
+        if(!obs.value.includes(`[Estado: ${statusText}]`)) {
+            obs.value = `[Estado: ${statusText}]\n` + obs.value;
+        }
+    }
+    // Resaltar botón seleccionado
+    if(btnElement) {
+        const parent = btnElement.parentElement;
+        parent.querySelectorAll('.btn').forEach(b => {
+            b.style.transform = 'scale(1)';
+            b.style.fontWeight = 'normal';
+        });
+        btnElement.style.transform = 'scale(1.05)';
+        btnElement.style.fontWeight = 'bold';
     }
 }
 
@@ -720,8 +758,36 @@ document.addEventListener('DOMContentLoaded', () => {
             repMovilInput.value = user.truck.trim();
         }
     }
+
+    // Configurar Datalist y Autocompletado de Kilometraje Inicial
+    const repMovilInput = document.getElementById('repMovil');
+    if (repMovilInput) {
+        repMovilInput.addEventListener('blur', () => {
+            const val = repMovilInput.value.trim().toUpperCase();
+            repMovilInput.value = val;
+            
+            // Buscar en caché el máximo kilometraje para este móvil
+            const cachedData = JSON.parse(localStorage.getItem('serfover_data_cache'));
+            if (cachedData && cachedData.reportes) {
+                let maxKm = 0;
+                cachedData.reportes.forEach(r => {
+                    if (r.movil && r.movil.toUpperCase() === val && r.kilometraje) {
+                        const km = parseInt(r.kilometraje);
+                        if (km > maxKm) maxKm = km;
+                    }
+                });
+                
+                if (maxKm > 0) {
+                    const kmInput = document.getElementById('repKilometraje');
+                    if(kmInput && !kmInput.value) {
+                        kmInput.value = maxKm;
+                    }
+                }
+            }
+        });
+    }
     
-    // Cargar historial
+    // Cargar historial y Datalist
     loadDriverHistory();
 
 

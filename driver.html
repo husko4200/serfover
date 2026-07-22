@@ -292,7 +292,8 @@
                                     <div class="form-grid">
                                         <div class="form-group">
                                             <label>Móvil (Ej: Autocargante)</label>
-                                            <input type="text" id="repMovil" required>
+                                            <input type="text" id="repMovil" list="movilesList" required autocomplete="off">
+                                            <datalist id="movilesList"></datalist>
                                         </div>
                                         <div class="form-group">
                                             <label>Kilometraje</label>
@@ -352,17 +353,36 @@
                                 <!-- STEP 3 -->
                                 <div class="stepper-step" id="step3">
                                     <h4 class="step-title">
-                                        <span class="step-num">03</span> Evidencia
+                                        <span class="step-num">03</span> Estado y Observaciones
                                     </h4>
                                     <div class="form-group">
-                                        <label>Observaciones</label>
-                                        <textarea id="repObservaciones" rows="3"></textarea>
+                                        <label style="margin-bottom: 0.5rem; display:block;">Estado Rápido</label>
+                                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                            <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--brand-primary); color:var(--text-primary); flex: 1;" onclick="setDriverStatus('🟢 En Ruta', this)">🟢 En Ruta</button>
+                                            <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--accent-warning); color:var(--text-primary); flex: 1;" onclick="setDriverStatus('🟡 Pausa', this)">🟡 Pausa</button>
+                                            <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--brand-secondary); color:var(--text-primary); flex: 1;" onclick="setDriverStatus('🔵 Destino', this)">🔵 Destino</button>
+                                        </div>
                                     </div>
                                     <div class="form-group">
-                                        <label>Foto de la Guía</label>
+                                        <label>Observaciones</label>
+                                        <textarea id="repObservaciones" rows="3" placeholder="Escribe detalles o selecciona un estado arriba..."></textarea>
+                                    </div>
+                                    <div class="step-nav">
+                                        <button type="button" class="btn" style="background:var(--glass-bg); color:var(--text-primary)" onclick="prevStep(2)">Atrás</button>
+                                        <button type="button" class="btn btn-primary" onclick="nextStep(4)">Siguiente</button>
+                                    </div>
+                                </div>
+
+                                <!-- STEP 4 -->
+                                <div class="stepper-step" id="step4">
+                                    <h4 class="step-title">
+                                        <span class="step-num">04</span> Evidencia Fotográfica
+                                    </h4>
+                                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">La evidencia es obligatoria para enviar el reporte.</p>
+                                    <div class="form-group">
                                         <div class="file-upload" onclick="document.getElementById('repImagen').click()">
                                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                                            <p>Haz clic para subir imagen o tomar foto</p>
+                                            <p>Haz clic para subir imagen o tomar foto de la Guía</p>
                                             <input type="file" id="repImagen" accept="image/*" style="display:none" onchange="previewImage(this, 'repPreview')">
                                         </div>
                                         <div id="repPreview" class="image-preview-container">
@@ -370,8 +390,8 @@
                                         </div>
                                     </div>
                                     <div class="step-nav">
-                                        <button type="button" class="btn" style="background:var(--glass-bg); color:var(--text-primary)" onclick="prevStep(2)">Atrás</button>
-                                        <button type="submit" class="btn btn-primary" id="btnSubmitReporte"><span>Guardar Reporte</span></button>
+                                        <button type="button" class="btn" style="background:var(--glass-bg); color:var(--text-primary)" onclick="prevStep(3)">Atrás</button>
+                                        <button type="submit" class="btn btn-primary" id="btnSubmitReporte" disabled style="opacity: 0.5; cursor: not-allowed;"><span>Guardar Reporte</span></button>
                                     </div>
                                     <div id="repStatus" style="margin-top: 1rem; display: none;"></div>
                                 </div>

@@ -167,6 +167,42 @@
                             </div>
                         </div>
                     </div>
+                    <!-- KPIs Financieros (BI) -->
+                    <h4 style="margin-bottom: 1rem; color: var(--text-primary); font-size: 1.05rem;">Métricas de Inteligencia de Negocios (BI)</h4>
+                    <div id="kpiFinancialDashboard" class="stats-grid" style="margin-bottom: 2rem;">
+                        <div class="stat-card" style="border-left: 3px solid var(--brand-secondary);">
+                            <div class="stat-info">
+                                <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">CPK Global</p>
+                                <h3 id="kpiCpk" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.6rem;">Cargando...</h3>
+                                <p style="color: var(--text-muted); font-size: 0.75rem;">Costo por Kilómetro (Promedio)</p>
+                                <span id="trendCpk" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
+                            </div>
+                        </div>
+                        <div class="stat-card" style="border-left: 3px solid var(--brand-primary);">
+                            <div class="stat-info">
+                                <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Rendimiento</p>
+                                <h3 id="kpiRendimiento" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.6rem;">Cargando...</h3>
+                                <p style="color: var(--text-muted); font-size: 0.75rem;">Km/L de la flota</p>
+                                <span id="trendRendimiento" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
+                            </div>
+                        </div>
+                        <div class="stat-card" style="border-left: 3px solid var(--accent-warning);">
+                            <div class="stat-info">
+                                <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Disponibilidad</p>
+                                <h3 id="kpiDisponibilidad" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.6rem;">Cargando...</h3>
+                                <p style="color: var(--text-muted); font-size: 0.75rem;">% Camiones Operativos</p>
+                                <span id="trendDisponibilidad" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
+                            </div>
+                        </div>
+                        <div class="stat-card" style="border-left: 3px solid var(--accent-danger);">
+                            <div class="stat-info">
+                                <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Costo x Viaje</p>
+                                <h3 id="kpiCostoViaje" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.6rem;">Cargando...</h3>
+                                <p style="color: var(--text-muted); font-size: 0.75rem;">Promedio de gastos por viaje</p>
+                                <span id="trendCostoViaje" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
+                            </div>
+                        </div>
+                    </div>
 
                     <h4 style="margin-bottom: 1rem; color: var(--text-primary); font-size: 1.05rem;">Módulos de Gestión</h4>
                             
@@ -287,6 +323,12 @@
                     </div>
 
                     <div id="dash-reportes" class="tab-content">
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;" id="reportFilters">
+                            <button class="btn btn-secondary active" onclick="filterReportsByTime('all', this)" style="border-radius: 20px; padding: 0.25rem 1rem;">Todos</button>
+                            <button class="btn btn-secondary" onclick="filterReportsByTime('today', this)" style="border-radius: 20px; padding: 0.25rem 1rem;">Hoy</button>
+                            <button class="btn btn-secondary" onclick="filterReportsByTime('week', this)" style="border-radius: 20px; padding: 0.25rem 1rem;">Esta Semana</button>
+                            <button class="btn btn-secondary" onclick="filterReportsByTime('month', this)" style="border-radius: 20px; padding: 0.25rem 1rem;">Este Mes</button>
+                        </div>
                         <div class="table-container">
                             <table id="tableReportes">
                                 <thead>
