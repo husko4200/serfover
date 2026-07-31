@@ -107,18 +107,55 @@
 
                 <!-- INICIO DEL DUEÑO -->
                 <div id="dash-inicio" class="tab-content active">
-                    <div class="card" style="margin-bottom: 1.5rem;">
-                        <div class="card-header">
-                            <h3 class="card-title" style="font-size: 1.5rem;">Hola, <span id="dashOwnerName">Administrador</span> 👋</h3>
-                        </div>
-                        <div style="padding: 0 0.5rem 0.5rem;">
-                            <p style="color: var(--text-secondary);">Bienvenido al resumen general de tu flota.</p>
+                    <!-- HERO DE BIENVENIDA -->
+                    <div class="driver-hero-card" style="margin-bottom: 1.5rem;">
+                        <div style="display:flex; align-items:center; gap:0.85rem;">
+                            <div class="driver-hero-avatar" id="heroAvatarWrapper">
+                                <img id="heroProfileImg" src="" alt="" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                                <span id="heroAvatarInitial" style="font-size:1.6rem; font-weight:700; color:var(--neon-green);">A</span>
+                            </div>
+                            <div>
+                                <p style="font-size:0.72rem; color:var(--text-secondary); margin:0 0 3px; text-transform:uppercase; letter-spacing:0.5px;">Bienvenido de vuelta</p>
+                                <h2 id="dashOwnerName" style="font-size:1.3rem; font-weight:700; color:var(--text-primary); margin:0 0 4px; line-height:1.2;">Administrador</h2>
+                                <p style="font-size:0.75rem; color:var(--text-muted); margin:0;">Resumen general de tu flota.</p>
+                            </div>
                         </div>
                     </div>
 
-                    <h4 style="margin-bottom: 1rem; color: var(--text-primary); font-size: 1.05rem;">Rendimiento del Mes</h4>
+                    <!-- MÓDULOS DE GESTIÓN (Acciones Rápidas) -->
+                    <div style="padding: 0 0.5rem 1.5rem;">
+                        <h4 style="margin-bottom: 1rem; color: var(--text-primary); font-size: 1.05rem;">&#x26A1; Módulos de Gestión</h4>
+                        <div class="actions-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <button onclick="switchDashTab('reportes')" class="action-card">
+                                <div class="action-icon" style="background: rgba(59,130,246,0.12); color: var(--brand-secondary);">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                </div>
+                                Reportes de Ruta
+                            </button>
+                            <button onclick="switchDashTab('flota')" class="action-card">
+                                <div class="action-icon" style="background: rgba(16,185,129,0.12); color: var(--brand-primary);">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                                </div>
+                                Resumen Flota
+                            </button>
+                            <button onclick="switchDashTab('combustible')" class="action-card">
+                                <div class="action-icon" style="background: rgba(239,68,68,0.12); color: var(--accent-danger);">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22v-8c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v8"></path><path d="M12 12v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6"></path><circle cx="12" cy="18" r="2"></circle></svg>
+                                </div>
+                                Combustible
+                            </button>
+                            <button onclick="switchDashTab('mantencion')" class="action-card">
+                                <div class="action-icon" style="background: rgba(245,158,11,0.12); color: var(--accent-warning);">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                                </div>
+                                Mantenciones
+                            </button>
+                        </div>
+                    </div>
+
+                    <h4 style="margin-bottom: 1rem; color: var(--text-primary); font-size: 1.05rem; padding-left: 0.5rem;">&#128202; Rendimiento del Mes</h4>
                     <!-- RESUMEN FLOTA -->
-                    <div class="stats-grid" style="margin-bottom: 2rem;">
+                    <div class="stats-grid" style="margin-bottom: 2rem; padding: 0 0.5rem;">
                         <div class="stat-card">
                             <div class="stat-icon" style="color: var(--brand-secondary); background-color: rgba(59,130,246,0.1);">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
@@ -170,71 +207,6 @@
                             </div>
                         </div>
                     </div>
-                    <!-- KPIs Financieros (BI) -->
-                    <h4 style="margin-bottom: 1rem; color: var(--text-primary); font-size: 1.05rem;">Métricas de Inteligencia de Negocios (BI)</h4>
-                    <div id="kpiFinancialDashboard" class="stats-grid" style="margin-bottom: 2rem;">
-                        <div class="stat-card" style="border-left: 3px solid var(--brand-secondary);">
-                            <div class="stat-info">
-                                <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">CPK Global</p>
-                                <h3 id="kpiCpk" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.6rem;">Cargando...</h3>
-                                <p style="color: var(--text-muted); font-size: 0.75rem;">Costo por Kilómetro (Promedio)</p>
-                                <span id="trendCpk" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
-                            </div>
-                        </div>
-                        <div class="stat-card" style="border-left: 3px solid var(--brand-primary);">
-                            <div class="stat-info">
-                                <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Rendimiento</p>
-                                <h3 id="kpiRendimiento" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.6rem;">Cargando...</h3>
-                                <p style="color: var(--text-muted); font-size: 0.75rem;">Km/L de la flota</p>
-                                <span id="trendRendimiento" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
-                            </div>
-                        </div>
-                        <div class="stat-card" style="border-left: 3px solid var(--accent-warning);">
-                            <div class="stat-info">
-                                <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Disponibilidad</p>
-                                <h3 id="kpiDisponibilidad" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.6rem;">Cargando...</h3>
-                                <p style="color: var(--text-muted); font-size: 0.75rem;">% Camiones Operativos</p>
-                                <span id="trendDisponibilidad" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
-                            </div>
-                        </div>
-                        <div class="stat-card" style="border-left: 3px solid var(--accent-danger);">
-                            <div class="stat-info">
-                                <p style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Costo x Viaje</p>
-                                <h3 id="kpiCostoViaje" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.6rem;">Cargando...</h3>
-                                <p style="color: var(--text-muted); font-size: 0.75rem;">Promedio de gastos por viaje</p>
-                                <span id="trendCostoViaje" style="font-size: 0.75rem; color: var(--text-muted); display: block; margin-top: 0.25rem;"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h4 style="margin-bottom: 1rem; color: var(--text-primary); font-size: 1.05rem;">Módulos de Gestión</h4>
-                            
-                            <div class="actions-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                                <button onclick="switchDashTab('reportes')" class="action-card">
-                                    <div class="action-icon" style="background: rgba(59,130,246,0.12); color: var(--brand-secondary);">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                    </div>
-                                    Reportes de Ruta
-                                </button>
-                                <button onclick="switchDashTab('flota')" class="action-card">
-                                    <div class="action-icon" style="background: rgba(16,185,129,0.12); color: var(--brand-primary);">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                                    </div>
-                                    Resumen Flota
-                                </button>
-                                <button onclick="switchDashTab('combustible')" class="action-card">
-                                    <div class="action-icon" style="background: rgba(239,68,68,0.12); color: var(--accent-danger);">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22v-8c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v8"></path><path d="M12 12v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6"></path><circle cx="12" cy="18" r="2"></circle></svg>
-                                    </div>
-                                    Combustible
-                                </button>
-                                <button onclick="switchDashTab('mantencion')" class="action-card">
-                                    <div class="action-icon" style="background: rgba(245,158,11,0.12); color: var(--accent-warning);">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                                    </div>
-                                    Mantenciones
-                                </button>
-                            </div>
                     
 
 

@@ -96,15 +96,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (updatedData.avatar !== undefined) users[index].avatar = updatedData.avatar;
             if (updatedData.truck !== undefined) users[index].truck = updatedData.truck;
 
-            localStorage.setItem('serfover_users', JSON.stringify(users));
-            
-            // Actualizar sesión actual
-            const newSession = { ...users[index] };
-            localStorage.setItem('serfover_user', JSON.stringify(newSession));
-            
-            // Refrescar UI si es posible
-            window.updateProfileUI();
-            return true;
+            try {
+                localStorage.setItem('serfover_users', JSON.stringify(users));
+                
+                // Actualizar sesión actual
+                const newSession = { ...users[index] };
+                localStorage.setItem('serfover_user', JSON.stringify(newSession));
+                
+                // Refrescar UI si es posible
+                window.updateProfileUI();
+                return true;
+            } catch (e) {
+                console.error("Error saving profile (Storage full?):", e);
+                alert("Error al guardar: La imagen podría ser demasiado grande o no hay espacio.");
+                return false;
+            }
         }
         return false;
     };
@@ -129,6 +135,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 container.style.color = 'white';
             }
         });
+
+        // Actualizar avatar en driver dashboard (hero y nav)
+        const heroImg = document.getElementById('heroProfileImg');
+        const heroInitial = document.getElementById('heroAvatarInitial');
+        const bnavAvatar = document.getElementById('bnavAvatar');
+        
+        if (heroImg && heroInitial) {
+            if (user.avatar) {
+                heroImg.src = user.avatar;
+                heroImg.style.display = 'block';
+                heroInitial.style.display = 'none';
+            } else {
+                heroImg.style.display = 'none';
+                heroInitial.style.display = 'block';
+                heroInitial.textContent = user.name.charAt(0).toUpperCase();
+            }
+        }
+        
+        if (bnavAvatar) {
+            if (user.avatar) {
+                bnavAvatar.innerHTML = `<img src="${user.avatar}" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                bnavAvatar.style.background = 'transparent';
+                bnavAvatar.style.color = 'transparent';
+            } else {
+                bnavAvatar.innerHTML = user.name.charAt(0).toUpperCase();
+                bnavAvatar.style.background = 'var(--glass-bg)';
+                bnavAvatar.style.color = 'var(--text-primary)';
+            }
+        }
     };
 
     // Funciones globales útiles (cerrar sesión, check auth)
@@ -207,13 +242,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.handleProfileAvatarChange = function(input) {
         if (input.files && input.files[0]) {
+            const file = input.files[0];
             const reader = new FileReader();
             reader.onload = function(e) {
-                const previewDiv = document.getElementById('profileAvatarPreview');
-                previewDiv.innerHTML = `<img src="${e.target.result}" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
-                previewDiv.dataset.base64 = e.target.result;
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 250;
+                    const MAX_HEIGHT = 250;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    
+                    const previewDiv = document.getElementById('profileAvatarPreview');
+                    previewDiv.innerHTML = `<img src="${dataUrl}" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                    previewDiv.dataset.base64 = dataUrl;
+                };
+                img.src = e.target.result;
             }
-            reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(file);
         }
     };
 

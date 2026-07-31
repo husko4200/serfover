@@ -30,19 +30,24 @@
                 </div>
                 <div class="nav-item" onclick="switchTab('reporte')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    Reporte
+                    Report
                 </div>
                 <div class="nav-item" onclick="switchTab('combustible')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22v-8c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v8"></path><path d="M12 12v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6"></path><circle cx="12" cy="18" r="2"></circle></svg>
                     Combustible
                 </div>
+
                 <div class="nav-item" onclick="switchTab('mantencion')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
                     Mantención
                 </div>
                 <div class="nav-item" onclick="switchTab('historial')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                    Historial
+                    Historial de Reportes
+                </div>
+                <div class="nav-item" onclick="switchTab('historial-comb')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22v-8c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v8"></path><path d="M12 12v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6"></path><circle cx="12" cy="18" r="2"></circle></svg>
+                    Mis Combustibles
                 </div>
                 <div class="nav-item" onclick="switchTab('historial-mant')">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
@@ -67,16 +72,16 @@
                     <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Abrir menú">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
                     </button>
-                    <h2 class="page-title" id="pageTitle">Hoja de Ruta</h2>
+                    <h2 class="page-title" id="pageTitle">Inicio</h2>
                 </div>
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
                     <div class="date-display" id="currentDate" style="display: none;"></div>
-                    <button class="btn-icon" onclick="location.reload()" aria-label="Actualizar Página" title="Actualizar">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.21L21.5 8"></path></svg>
+                    <button class="btn btn-secondary" onclick="location.reload()" aria-label="Actualizar Sistema" style="font-size: 0.75rem; padding: 0.4rem 0.75rem; display: flex; align-items: center; gap: 0.4rem; border: 1px solid rgba(255,255,255,0.1);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.59-9.21L21.5 8"></path></svg>
+                        Actualizar Sistema
                     </button>
-                    <button class="btn-icon" onclick="toggleTheme()" aria-label="Cambiar Tema" title="Cambiar Tema">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-                    </button>
+
+
                     <button id="logoutBtnMobile" class="btn-icon mobile-logout" onclick="document.getElementById('logoutBtn').click()">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
                     </button>
@@ -87,149 +92,100 @@
                 
                 <!-- INICIO DASHBOARD CONDUCTOR -->
                 <div id="tab-inicio" class="tab-content active">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title" style="font-size: 1.5rem;">Hola, <span id="dashDriverName">Conductor</span> 👋</h3>
+
+                    <!-- HERO DE BIENVENIDA -->
+                    <div class="driver-hero-card">
+                        <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:0.5rem;">
+                            <div style="display:flex; align-items:center; gap:0.85rem;">
+                                <div class="driver-hero-avatar" id="heroAvatarWrapper">
+                                    <img id="heroProfileImg" src="" alt="" style="display:none; width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                                    <span id="heroAvatarInitial" style="font-size:1.6rem; font-weight:700; color:var(--neon-green);">C</span>
+                                </div>
+                                <div>
+                                    <p style="font-size:0.72rem; color:var(--text-secondary); margin:0 0 3px; text-transform:uppercase; letter-spacing:0.5px;">Bienvenido de vuelta</p>
+                                <h2 id="dashDriverName" style="font-size:1.3rem; font-weight:700; color:var(--text-primary); margin:0 0 7px; line-height:1.2;">Conductor</h2>
+                                <div class="driver-plate-badge" id="heroPlateBadge" style="display:none;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="22" height="13" rx="2"/><path d="M5 17v1a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1"/></svg>
+                                    <span id="heroPlateText">--</span>
+                                </div>
+                            </div>
                         </div>
-                        <div style="padding: 0 0.5rem 1rem;">
-                            <p style="color: var(--text-secondary); margin-bottom: 1.75rem;">¿Qué deseas hacer hoy?</p>
-                            
-                            <!-- ACCIONES RÁPIDAS — PRIMERO (lo que el chofer necesita al llegar) -->
-                            <h4 class="section-title">Registrar Nuevos Datos</h4>
-                            <div class="actions-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                                <button onclick="switchTab('reporte')" class="action-card">
-                                    <div class="action-icon" style="background: rgba(16,185,129,0.12); color: var(--brand-primary);">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                    </div>
-                                    Ingresar Reporte
-                                </button>
-                                <button onclick="switchTab('combustible')" class="action-card">
-                                    <div class="action-icon" style="background: rgba(239,68,68,0.12); color: var(--accent-danger);">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22v-8c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v8"></path><path d="M12 12v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6"></path><circle cx="12" cy="18" r="2"></circle></svg>
-                                    </div>
-                                    Combustible
-                                </button>
-                                <button onclick="switchTab('mantencion')" class="action-card">
-                                    <div class="action-icon" style="background: rgba(245,158,11,0.12); color: var(--accent-warning);">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                                    </div>
-                                    Mantención
-                                </button>
+                            <div style="text-align:right; flex-shrink:0;">
+                                <span id="heroCurrDate" style="font-size:0.68rem; color:var(--text-muted); line-height:1.4; display:block;"></span>
                             </div>
+                        </div>
+                    </div>
 
-                            <h4 class="section-title">Consultar Historial</h4>
-                            <div class="actions-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
-                                <button onclick="switchTab('historial')" class="action-card">
-                                    <div class="action-icon" style="background: rgba(59,130,246,0.12); color: var(--brand-secondary);">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                    </div>
-                                    Mis Reportes
-                                </button>
-                                <button onclick="switchTab('historial-comb')" class="action-card">
-                                    <div class="action-icon" style="background: rgba(239,68,68,0.12); color: var(--accent-danger);">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22v-8c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v8"></path><path d="M12 12v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6"></path><circle cx="12" cy="18" r="2"></circle></svg>
-                                    </div>
-                                    Mis Combustibles
-                                </button>
-                                <button onclick="switchTab('historial-mant')" class="action-card">
-                                    <div class="action-icon" style="background: rgba(245,158,11,0.12); color: var(--accent-warning);">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                                    </div>
-                                    Mis Mantenciones
-                                </button>
+                    <!-- ACCIONES RÁPIDAS -->
+                    <div style="padding: 1rem 1rem 1.5rem;">
+                        <h4 class="section-title" style="margin-top:0;">&#x26A1; Registrar</h4>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.75rem;">
+                            <button onclick="switchTab('reporte')" class="driver-quick-btn">
+                                <div class="driver-quick-icon" style="background: rgba(16,185,129,0.15); color: var(--neon-green);">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                                </div>
+                                <span>Reporte</span>
+                            </button>
+                            <button onclick="switchTab('combustible')" class="driver-quick-btn">
+                                <div class="driver-quick-icon" style="background: rgba(239,68,68,0.15); color: #f87171;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22v-8c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v8"></path><path d="M12 12v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6"></path><circle cx="12" cy="18" r="2"></circle></svg>
+                                </div>
+                                <span>Combustible</span>
+                            </button>
+                            <button onclick="switchTab('mantencion')" class="driver-quick-btn">
+                                <div class="driver-quick-icon" style="background: rgba(245,158,11,0.15); color: #fbbf24;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                                </div>
+                                <span>Mantenci&oacute;n</span>
+                            </button>
+                        </div>
+
+                        <!-- ÚLTIMO VIAJE -->
+                        <h4 class="section-title">&#128663; Último Viaje</h4>
+                        <div id="lastReportCardContainer" style="margin-bottom: 1.75rem;">
+                            <div class="card" style="padding: 1.5rem; text-align: center; color: var(--text-secondary); background: var(--glass-bg);">
+                                Cargando información del último viaje...
                             </div>
+                        </div>
 
-                            <!-- ALERTAS (aparecen solo si hay algo urgente) -->
-                            <div id="driverAlertsContainer" style="margin-bottom: 2rem; display: none; flex-direction: column; gap: 1rem;">
-                            </div>
-
-                            <!-- MÉTRICAS — DESPUÉS (consulta pasiva) -->
-                            <h4 class="section-title">Rendimiento del Mes</h4>
-                            <div class="stats-grid" style="margin-bottom: 2rem;">
-                                <div class="stat-card">
-                                    <div class="stat-icon stat-icon--blue">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-                                    </div>
-                                    <div class="stat-info">
-                                        <h3 id="driverStatViajes">0</h3>
-                                        <p>Mis Viajes (Mes)</p>
-                                    </div>
+                        <!-- MI RENDIMIENTO -->
+                        <h4 class="section-title">&#128200; Mi Rendimiento</h4>
+                        <div style="background: var(--glass-bg); padding: 1.25rem; border-radius: var(--radius-md); text-align: center; margin-bottom: 1.75rem; border: 1px solid rgba(0, 255, 136, 0.2);">
+                            <div style="font-size: 2.8rem; color: var(--neon-green); font-weight: 800; letter-spacing:-1px; margin-bottom: 4px;" id="driverKpiRendimiento">-- Km/L</div>
+                            <div id="driverTrendRendimiento" style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">Calculando...</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                                <div style="background: rgba(0,0,0,0.25); padding: 0.75rem; border-radius: var(--radius-sm);">
+                                    <span style="display: block; font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 2px;">Km Recorridos</span>
+                                    <strong style="font-size: 1.15rem; color: var(--text-primary);" id="driverKmRendimiento">0</strong>
                                 </div>
-                                <div class="stat-card">
-                                    <div class="stat-icon stat-icon--amber">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                                    </div>
-                                    <div class="stat-info">
-                                        <h3 id="driverStatMant">0</h3>
-                                        <p>Mis Mantenciones (Mes)</p>
-                                    </div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-icon stat-icon--red">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                                    </div>
-                                    <div class="stat-info">
-                                        <h3 id="driverStatGastoComb">$0</h3>
-                                        <p>Gasto Combustible</p>
-                                    </div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-icon stat-icon--red">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-                                    </div>
-                                    <div class="stat-info">
-                                        <h3 id="driverStatGastoMant">$0</h3>
-                                        <p>Gasto Mantención</p>
-                                    </div>
-                                </div>
-                                <div class="stat-card" style="grid-column: 1 / -1;">
-                                    <div class="stat-icon stat-icon--green">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                                    </div>
-                                    <div class="stat-info">
-                                        <h3 id="driverStatKmTotales">0 km</h3>
-                                        <p>Total Recorrido (Mes)</p>
-                                    </div>
+                                <div style="background: rgba(0,0,0,0.25); padding: 0.75rem; border-radius: var(--radius-sm);">
+                                    <span style="display: block; font-size: 0.72rem; color: var(--text-secondary); margin-bottom: 2px;">Litros Cargados</span>
+                                    <strong style="font-size: 1.15rem; color: var(--text-primary);" id="driverLitrosRendimiento">0</strong>
                                 </div>
                             </div>
-                            
+                        </div>
 
-
-                            <!-- Gráfico de Rendimiento -->
-                            <div class="card" style="margin-bottom: 2rem;">
-                                <div class="card-header">
-                                    <h3 class="card-title">📊 Kilómetros Recorridos por Día (Mes Actual)</h3>
+                        <!-- VER MIS REGISTROS -->
+                        <h4 class="section-title">&#128193; Mis Registros</h4>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.75rem;">
+                            <button onclick="switchTab('historial')" class="driver-quick-btn">
+                                <div class="driver-quick-icon" style="background: rgba(99,102,241,0.15); color: #a5b4fc;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                 </div>
-                                <div style="padding: 1rem; position: relative; height: 300px;">
-                                    <canvas id="driverActivityChart"></canvas>
+                                <span>Reportes</span>
+                            </button>
+                            <button onclick="switchTab('historial-comb')" class="driver-quick-btn">
+                                <div class="driver-quick-icon" style="background: rgba(239,68,68,0.12); color: #f87171;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 22v-8c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v8"></path><path d="M12 12v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6"></path><circle cx="12" cy="18" r="2"></circle></svg>
                                 </div>
-                            </div>
-                            
-                            <!-- Gráficos de Análisis -->
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-                                
-                                <!-- Gráfico de Distribución de Gastos -->
-                                <div class="card" style="margin-bottom: 0;">
-                                    <div class="card-header">
-                                        <h3 class="card-title">Distribución de Mis Gastos</h3>
-                                    </div>
-                                    <div style="padding: 1rem; height: 250px; display: flex; justify-content: center;">
-                                        <canvas id="driverExpensesChart"></canvas>
-                                    </div>
+                                <span>Combustible</span>
+                            </button>
+                            <button onclick="switchTab('historial-mant')" class="driver-quick-btn">
+                                <div class="driver-quick-icon" style="background: rgba(245,158,11,0.12); color: #fbbf24;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
                                 </div>
-
-                                <!-- Gráfico de Viajes -->
-                                <div class="card" style="margin-bottom: 0;">
-                                    <div class="card-header">
-                                        <h3 class="card-title">Mis Viajes (Últimos 6 Meses)</h3>
-                                    </div>
-                                    <div style="padding: 1rem; height: 250px;">
-                                        <canvas id="driverTripsChart"></canvas>
-                                    </div>
-                                </div>
-                                
-                            </div>
-
+                                <span>Mantenciones</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -238,118 +194,87 @@
                 <div id="tab-reporte" class="tab-content">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Nueva Hoja de Ruta</h3>
+                            <h3 class="card-title">Nuevo Reporte de Viaje</h3>
                         </div>
-                        <form id="formReporte">
-                            <div class="stepper">
-                                <div class="stepper-progress">
-                                    <div class="stepper-bar" id="stepperBar" style="width: 33%"></div>
-                                </div>
-                                
-                                <!-- STEP 1 -->
-                                <div class="stepper-step active" id="step1">
-                                    <h4 class="step-title">
-                                        <span class="step-num">01</span> Datos del Viaje
-                                    </h4>
-                                    <div class="form-grid">
-                                        <div class="form-group">
-                                            <label>Móvil (Ej: Autocargante)</label>
-                                            <input type="text" id="repMovil" list="movilesList" required autocomplete="off">
-                                            <datalist id="movilesList"></datalist>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Kilometraje</label>
-                                            <input type="number" id="repKilometraje" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Fundo</label>
-                                            <input type="text" id="repFundo" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Destino</label>
-                                            <input type="text" id="repDestino" required>
-                                        </div>
-                                        <div class="form-group" style="grid-column: 1 / -1;">
-                                            <label>Sector Faena</label>
-                                            <input type="text" id="repFaena" required>
-                                        </div>
-                                    </div>
-                                    <div class="step-nav">
-                                        <button type="button" class="btn btn-primary" onclick="nextStep(2)">Siguiente</button>
-                                    </div>
-                                </div>
-                                
-                                <!-- STEP 2 -->
-                                <div class="stepper-step" id="step2">
-                                    <h4 class="step-title">
-                                        <span class="step-num">02</span> Gastos
-                                    </h4>
-                                    <div class="form-grid">
-                                        <div class="form-group">
-                                            <label>Peaje</label>
-                                            <input type="number" id="repPeaje" oninput="updateTotal()">
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Romana</label>
-                                            <input type="number" id="repRomana" oninput="updateTotal()">
-                                        </div>
-                                        <div class="form-group">
-                                            <label>N° Guía</label>
-                                            <input type="text" id="repGuia">
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Viático</label>
-                                            <input type="number" id="repViatico" oninput="updateTotal()">
-                                        </div>
-                                        <div class="form-group" style="grid-column: 1 / -1;">
-                                            <label>Total</label>
-                                            <input type="number" id="repTotal" readonly style="opacity: 0.7; cursor: not-allowed;">
-                                        </div>
-                                    </div>
-                                    <div class="step-nav">
-                                        <button type="button" class="btn" style="background:var(--glass-bg); color:var(--text-primary)" onclick="prevStep(1)">Atrás</button>
-                                        <button type="button" class="btn btn-primary" onclick="nextStep(3)">Siguiente</button>
-                                    </div>
-                                </div>
-                                
-                                <!-- STEP 3 -->
-                                <div class="stepper-step" id="step3">
-                                    <h4 class="step-title">
-                                        <span class="step-num">03</span> Estado y Observaciones
-                                    </h4>
+                        <form id="formReporte" class="form-grid" style="padding: 0 1rem 1rem;">
+                            <!-- Datos del Viaje -->
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <h4 style="margin: 0.5rem 0; color: var(--text-primary); font-size: 0.95rem;">📋 Datos del Viaje</h4>
+                            </div>
+                            <div class="form-group">
+                                <label>Móvil (Ej: Autocargante)</label>
+                                <input type="text" id="repMovil" list="movilesList" required autocomplete="off">
+                                <datalist id="movilesList"></datalist>
+                            </div>
+                            <div class="form-group">
+                                <label>Kilometraje</label>
+                                <input type="number" id="repKilometraje" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Fundo</label>
+                                <input type="text" id="repFundo" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Destino</label>
+                                <input type="text" id="repDestino" required>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Sector Faena</label>
+                                <input type="text" id="repFaena" required>
+                            </div>
 
-                                    <div class="form-group">
-                                        <label>Observaciones</label>
-                                        <textarea id="repObservaciones" rows="3" placeholder="Escribe detalles o selecciona un estado arriba..."></textarea>
-                                    </div>
-                                    <div class="step-nav">
-                                        <button type="button" class="btn" style="background:var(--glass-bg); color:var(--text-primary)" onclick="prevStep(2)">Atrás</button>
-                                        <button type="button" class="btn btn-primary" onclick="nextStep(4)">Siguiente</button>
-                                    </div>
-                                </div>
+                            <!-- Gastos -->
+                            <div class="form-group" style="grid-column: 1 / -1; margin-top: 0.5rem;">
+                                <h4 style="margin: 0.5rem 0; color: var(--text-primary); font-size: 0.95rem;">💰 Gastos</h4>
+                            </div>
+                            <div class="form-group">
+                                <label>Peaje</label>
+                                <input type="number" id="repPeaje" oninput="updateTotal()">
+                            </div>
+                            <div class="form-group">
+                                <label>Romana</label>
+                                <input type="number" id="repRomana" oninput="updateTotal()">
+                            </div>
+                            <div class="form-group">
+                                <label>N° Guía</label>
+                                <input type="text" id="repGuia">
+                            </div>
+                            <div class="form-group">
+                                <label>Viático</label>
+                                <input type="number" id="repViatico" oninput="updateTotal()">
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Total</label>
+                                <input type="number" id="repTotal" readonly style="opacity: 0.7; cursor: not-allowed;">
+                            </div>
 
-                                <!-- STEP 4 -->
-                                <div class="stepper-step" id="step4">
-                                    <h4 class="step-title">
-                                        <span class="step-num">04</span> Foto de Guía
-                                    </h4>
-                                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">La foto de guía es obligatoria para enviar el reporte.</p>
-                                    <div class="form-group">
-                                        <div class="file-upload" onclick="document.getElementById('repImagen').click()">
-                                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                                            <p>Haz clic para subir imagen o tomar foto de la Guía</p>
-                                            <input type="file" id="repImagen" accept="image/*" style="display:none" onchange="previewImage(this, 'repPreview')">
-                                        </div>
-                                        <div id="repPreview" class="image-preview-container">
-                                            <img src="" alt="Preview">
-                                        </div>
-                                    </div>
-                                    <div class="step-nav">
-                                        <button type="button" class="btn" style="background:var(--glass-bg); color:var(--text-primary)" onclick="prevStep(3)">Atrás</button>
-                                        <button type="submit" class="btn btn-primary" id="btnSubmitReporte" disabled style="opacity: 0.5; cursor: not-allowed;"><span>Guardar Reporte</span></button>
-                                    </div>
-                                    <div id="repStatus" style="margin-top: 1rem; display: none;"></div>
+                            <!-- Observaciones -->
+                            <div class="form-group" style="grid-column: 1 / -1; margin-top: 0.5rem;">
+                                <h4 style="margin: 0.5rem 0; color: var(--text-primary); font-size: 0.95rem;">📝 Observaciones</h4>
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Observaciones</label>
+                                <textarea id="repObservaciones" rows="3" placeholder="Escribe detalles adicionales..."></textarea>
+                            </div>
+
+                            <!-- Foto de Guía -->
+                            <div class="form-group" style="grid-column: 1 / -1; margin-top: 0.5rem;">
+                                <h4 style="margin: 0.5rem 0; color: var(--text-primary); font-size: 0.95rem;">📷 Foto de Guía</h4>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.75rem;">La foto de guía es obligatoria para enviar el report.</p>
+                                <div class="file-upload" onclick="document.getElementById('repImagen').click()">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                    <p>Haz clic para subir imagen o tomar foto de la Guía</p>
+                                    <input type="file" id="repImagen" accept="image/*" style="display:none" onchange="previewImage(this, 'repPreview')">
                                 </div>
+                                <div id="repPreview" class="image-preview-container">
+                                    <img src="" alt="Preview">
+                                </div>
+                            </div>
+
+                            <!-- Botón Enviar -->
+                            <div style="grid-column: 1 / -1; margin-top: 1rem;">
+                                <button type="submit" class="btn btn-primary btn-block" id="btnSubmitReporte"><span>Guardar Report</span></button>
+                                <div id="repStatus" style="margin-top: 1rem; display: none;"></div>
                             </div>
                         </form>
                     </div>
@@ -362,6 +287,10 @@
                             <h3 class="card-title">Carga de Combustible</h3>
                         </div>
                         <form id="formCombustible" class="form-grid">
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Móvil (Patente del Camión)</label>
+                                <input type="text" id="combMovil" list="movilesList" placeholder="Ej. ABCD12" required>
+                            </div>
                             <div class="form-group">
                                 <label>Litros Cargados</label>
                                 <input type="number" step="0.01" id="combLitros" required>
@@ -394,6 +323,8 @@
                         </form>
                     </div>
                 </div>
+
+
 
                 <!-- MANTENCION -->
                 <div id="tab-mantencion" class="tab-content">
@@ -538,6 +469,17 @@
         </main>
     </div>
 
+    <!-- SUCCESS OVERLAY (Task 6) -->
+    <div id="successOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-primary); z-index: 9999; flex-direction: column; align-items: center; justify-content: center;">
+        <div style="background: rgba(16,185,129,0.1); width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;">
+            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        </div>
+        <h2 style="color: var(--text-primary); font-size: 1.8rem; margin-bottom: 0.5rem; font-weight: 600;">¡Registrado!</h2>
+        <p style="color: var(--text-secondary); text-align: center; max-width: 80%;">Tu información fue guardada con éxito.</p>
+    </div>
+
     <!-- Modal Detalles -->
     <div id="detailModal" class="modal">
         <div class="modal-content">
@@ -616,11 +558,12 @@
         </button>
         <button class="bnav-item" onclick="switchTab('combustible')" data-tab="combustible">
             <svg width="22" height="22" viewBox="0 0 24 24"><path d="M3 22v-8c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v8"/><path d="M12 12v-6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v6"/><circle cx="12" cy="18" r="2"/></svg>
-            <span>Fuel</span>
+            <span>Combustible</span>
         </button>
+
         <button class="bnav-item" onclick="switchTab('historial')" data-tab="historial">
             <svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span>Historial</span>
+            <span>Historiales</span>
         </button>
         <button class="bnav-item" onclick="openProfileModal()">
             <div class="bnav-avatar" id="bnavAvatar">C</div>
@@ -640,37 +583,8 @@
     <script src="api.js"></script>
     <script src="driver.js"></script>
 
-    <!-- SOCIAL CHAT -->
-    <button class="fab-chat" onclick="window.Social.toggleTeamSidebar()">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-    </button>
-    <aside class="right-sidebar">
-        <div class="sidebar-header">
-            <h3>Comunidad</h3>
-            <button class="close-btn" onclick="window.Social.toggleTeamSidebar()">&times;</button>
-        </div>
-        <div class="sidebar-content">
-            <h4 style="padding: 1rem; margin: 0; color: var(--text-secondary); font-size: 0.8rem; text-transform: uppercase;">Miembros</h4>
-            <div id="usersListContainer" class="users-list"></div>
-            <div style="padding: 1rem; text-align: center;">
-                <button class="btn btn-primary btn-block" onclick="window.Social.openChat()">Abrir Chat Grupal</button>
-            </div>
-        </div>
-    </aside>
-    <div id="chatWindow" class="chat-window">
-        <div class="chat-header">
-            <h3 id="chatTitle">Chat Grupal</h3>
-            <button class="close-btn" onclick="window.Social.closeChat()">&times;</button>
-        </div>
-        <div id="chatMessages" class="chat-messages"></div>
-        <form id="formChat" class="chat-input-area">
-            <input type="text" id="chatInput" placeholder="Escribe un mensaje..." autocomplete="off">
-            <button type="submit" class="btn-icon" style="color: var(--brand-primary);">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-            </button>
-        </form>
-    </div>
-    <script src="social.js"></script>
+
+
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

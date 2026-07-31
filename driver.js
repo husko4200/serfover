@@ -18,15 +18,16 @@ function switchTab(tabId) {
 
     // Cambiar título
     const titles = {
-        'inicio': 'Panel de Inicio',
+        'inicio': 'Inicio',
         'muro': 'Muro del Equipo',
-        'reporte': 'Hoja de Ruta',
-        'combustible': 'Control de Combustible',
-        'mantencion': 'Registro de Mantenciones',
-        'historial': 'Mis Reportes',
+        'reporte': 'Nuevo Reporte',
+        'combustible': 'Combustible',
+        'mantencion': 'Mantención',
+        'historial': 'Historial de Reportes',
+        'historial-comb': 'Mis Combustibles',
         'historial-mant': 'Mis Mantenciones'
     };
-    document.getElementById('pageTitle').textContent = titles[tabId] || 'Panel';
+    document.getElementById('pageTitle').textContent = titles[tabId] || 'Inicio';
 }
 
 // Lógica del Stepper (Formulario de Reporte)
@@ -259,11 +260,10 @@ function getMovilFromDesc(desc) {
 async function loadDriverHistory() {
     const setCargando = (id) => {
         const el = document.getElementById(id);
-        if (el && (el.textContent.trim() === '0' || el.textContent.trim() === '$0' || el.textContent.trim() === '0 km' || el.textContent.trim() === '-' || el.textContent.trim() === '0 viajes' || el.textContent.trim() === '0 mantenciones')) {
-            el.innerHTML = '<span style="font-size: 0.9rem; color: var(--text-muted);">Cargando...</span>';
-        }
+        if (el && el.innerHTML.includes('Cargando')) return;
+        if (el) el.innerHTML = '<span style="font-size: 0.9rem; color: var(--text-muted);">Cargando...</span>';
     };
-    ['driverStatViajes', 'driverStatMant', 'driverStatGastoComb', 'driverStatGastoMant', 'driverStatKmTotales'].forEach(setCargando);
+    setCargando('lastReportCardContainer');
 
     try {
         const data = await API.getData();
@@ -360,11 +360,7 @@ async function loadDriverHistory() {
             }
         });
 
-        const elStatViajes = document.getElementById('driverStatViajes');
-        if (elStatViajes) elStatViajes.textContent = driverViajesMes;
 
-        const elStatMant = document.getElementById('driverStatMant');
-        if (elStatMant) elStatMant.textContent = driverMantMes;
 
         const tbodyMant = document.querySelector('#tableDriverMantenciones tbody');
         if (tbodyMant) {
@@ -424,30 +420,61 @@ async function loadDriverHistory() {
             }
         }
         let totalCombMesCost = 0;
+        let totalLitrosMes = 0;
+        let prevLitrosMes = 0;
+
         (data.combustibles || []).filter(c => c.driver === user.name).forEach(c => {
             const d = new Date(c.fecha);
             if(d.getFullYear() === currentYearStat && d.getMonth() === currentMonthStat) {
                 totalCombMesCost += parseFloat(c.valorTotal || c.valor || 0);
+                totalLitrosMes += parseFloat(c.litros || 0);
+            } else if(d.getFullYear() === currentYearStat && d.getMonth() === currentMonthStat - 1) {
+                prevLitrosMes += parseFloat(c.litros || 0);
+            } else if(currentMonthStat === 0 && d.getFullYear() === currentYearStat - 1 && d.getMonth() === 11) {
+                prevLitrosMes += parseFloat(c.litros || 0);
             }
         });
 
-        const elComb = document.getElementById('driverStatGastoComb');
-        if (elComb) elComb.textContent = '$' + totalCombMesCost.toLocaleString('es-CL');
-
-        const elMant = document.getElementById('driverStatGastoMant');
-        if (elMant) elMant.textContent = '$' + totalMantMesCost.toLocaleString('es-CL');
-
+        // Calcular Rendimiento
         let totalKmMes = 0;
-        misReps.forEach(rep => {
-            const d = new Date(rep.fecha);
+        let prevKmMes = 0;
+        misReps.forEach(r => {
+            const d = new Date(r.fecha);
             if(d.getFullYear() === currentYearStat && d.getMonth() === currentMonthStat) {
-                const kmIni = parseInt(rep.kmInicio) || 0;
-                const kmFin = parseInt(rep.kmTermino) || 0;
-                if (kmFin > kmIni) totalKmMes += (kmFin - kmIni);
+                totalKmMes += parseFloat(r.kilometraje || 0);
+            } else if(d.getFullYear() === currentYearStat && d.getMonth() === currentMonthStat - 1) {
+                prevKmMes += parseFloat(r.kilometraje || 0);
+            } else if(currentMonthStat === 0 && d.getFullYear() === currentYearStat - 1 && d.getMonth() === 11) {
+                prevKmMes += parseFloat(r.kilometraje || 0);
             }
         });
-        const elKm = document.getElementById('driverStatKmTotales');
-        if (elKm) elKm.textContent = totalKmMes.toLocaleString('es-CL') + ' km';
+
+        const currentRend = totalLitrosMes > 0 ? (totalKmMes / totalLitrosMes) : 0;
+        const prevRend = prevLitrosMes > 0 ? (prevKmMes / prevLitrosMes) : 0;
+        
+        const kpiRend = document.getElementById('driverKpiRendimiento');
+        if (kpiRend) {
+            kpiRend.textContent = currentRend > 0 ? currentRend.toFixed(2) + ' Km/L' : 'Sin datos';
+            document.getElementById('driverKmRendimiento').textContent = totalKmMes;
+            document.getElementById('driverLitrosRendimiento').textContent = totalLitrosMes;
+            
+            const trendEl = document.getElementById('driverTrendRendimiento');
+            if (currentRend > 0 && prevRend > 0) {
+                const diff = currentRend - prevRend;
+                const perc = (diff / prevRend) * 100;
+                if (diff >= 0) {
+                    trendEl.innerHTML = `<span style="color: var(--neon-green);">↑ +${perc.toFixed(1)}%</span> vs mes anterior (${prevRend.toFixed(2)} Km/L)`;
+                } else {
+                    trendEl.innerHTML = `<span style="color: var(--accent-danger);">↓ ${perc.toFixed(1)}%</span> vs mes anterior (${prevRend.toFixed(2)} Km/L)`;
+                }
+            } else if (currentRend > 0 && prevRend === 0) {
+                trendEl.textContent = 'Sin datos del mes anterior';
+            } else {
+                trendEl.textContent = 'Registra reportes y combustible para ver tu rendimiento';
+            }
+        }
+
+
 
         // Alertas de cambio de aceite para el móvil asignado
         if (miMovil) {
@@ -503,103 +530,57 @@ async function loadDriverHistory() {
 
 
 
-        // --- Gráfico 1: Distribución de Gastos (Mes Actual) ---
-        if (window._driverExpensesChartInst) window._driverExpensesChartInst.destroy();
-        const ctxEx = document.getElementById('driverExpensesChart');
-        if (ctxEx) {
-            const hasData = (totalCombMesCost + totalMantMesCost) > 0;
-            const cData = hasData ? [totalCombMesCost, totalMantMesCost] : [1];
-            const cLabels = hasData ? ['Combustible', 'Mantenciones'] : ['Sin Gastos Este Mes'];
-            const cColors = hasData ? ['#ef4444', '#f59e0b'] : ['#e2e8f0'];
-
-            window._driverExpensesChartInst = new Chart(ctxEx, {
-                type: 'doughnut',
-                data: {
-                    labels: cLabels,
-                    datasets: [{
-                        data: cData,
-                        backgroundColor: cColors,
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'right', labels: { color: 'var(--text-primary)', font: { family: 'Outfit, sans-serif' } } },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    if (!hasData) return 'Sin Gastos';
-                                    let label = context.label || '';
-                                    if (label) label += ': ';
-                                    if (context.parsed !== null) label += '$' + context.parsed.toLocaleString('es-CL');
-                                    return label;
-                                }
-                            }
-                        }
-                    },
-                    cutout: '65%'
+        // --- Renderizar Último Viaje Registrado ---
+        const lastReportContainer = document.getElementById('lastReportCardContainer');
+        if (lastReportContainer) {
+            if (misReps.length > 0) {
+                const lastRep = misReps[0];
+                const d = new Date(lastRep.fecha);
+                const now = new Date();
+                const diffMs = now - d;
+                const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+                let timeAgo = '';
+                if (diffHrs < 1) {
+                    timeAgo = 'Hace menos de una hora';
+                } else if (diffHrs < 24) {
+                    timeAgo = `Hace ${diffHrs} horas`;
+                } else {
+                    const diffDays = Math.floor(diffHrs / 24);
+                    timeAgo = `Hace ${diffDays} días`;
                 }
-            });
-        }
-
-        // --- Gráfico 2: Viajes Últimos 6 Meses ---
-        if (window._driverTripsChartInst) window._driverTripsChartInst.destroy();
-        const ctxTr = document.getElementById('driverTripsChart');
-        if (ctxTr) {
-            const monthsNames = ['ene.', 'feb.', 'mar.', 'abr.', 'may.', 'jun.', 'jul.', 'ago.', 'sep.', 'oct.', 'nov.', 'dic.'];
-            const last6Months = [];
-            const tripsData = [];
-
-            const d = new Date();
-            for (let i = 5; i >= 0; i--) {
-                const pastDate = new Date(d.getFullYear(), d.getMonth() - i, 1);
-                last6Months.push(monthsNames[pastDate.getMonth()]);
                 
-                // Contar viajes para ese mes y año del conductor
-                const count = (data.reportes || []).filter(r => {
-                    if (r.driver !== user.name) return false;
-                    const rd = new Date(r.fecha);
-                    return rd.getFullYear() === pastDate.getFullYear() && rd.getMonth() === pastDate.getMonth();
-                }).length;
-                tripsData.push(count);
+                lastReportContainer.innerHTML = `
+                    <div class="card" style="padding: 1.5rem; background: var(--glass-bg);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <span style="font-size: 0.85rem; color: var(--text-secondary);">${timeAgo}</span>
+                            <span style="background: rgba(16,185,129,0.2); color: var(--brand-primary); padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">Completado</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <div style="font-size: 2rem; background: rgba(59,130,246,0.1); width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">🚛</div>
+                            <div>
+                                <h4 style="font-size: 1.2rem; color: var(--text-primary); margin: 0 0 0.2rem;">${lastRep.movil}</h4>
+                                <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem;">${lastRep.fundo} → ${lastRep.destino}</p>
+                            </div>
+                        </div>
+                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.05); display: flex; gap: 1rem;">
+                            <div style="flex: 1;">
+                                <span style="display: block; font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase;">Km Registrado</span>
+                                <strong style="color: var(--text-primary);">${lastRep.kilometraje} km</strong>
+                            </div>
+                            <div style="flex: 1;">
+                                <span style="display: block; font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase;">Guía</span>
+                                <strong style="color: var(--text-primary);">${lastRep.guia || '-'}</strong>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                lastReportContainer.innerHTML = `
+                    <div class="card" style="padding: 1.5rem; text-align: center; color: var(--text-secondary); background: var(--glass-bg);">
+                        Aún no tienes viajes registrados.
+                    </div>
+                `;
             }
-
-            window._driverTripsChartInst = new Chart(ctxTr, {
-                type: 'bar',
-                data: {
-                    labels: last6Months,
-                    datasets: [{
-                        label: 'Viajes Realizados',
-                        data: tripsData,
-                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                        borderColor: 'rgb(59, 130, 246)',
-                        borderWidth: 1,
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { callbacks: { label: c => c.parsed.y + ' viajes' } }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: 'var(--text-secondary)', stepSize: 1 }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: 'var(--text-secondary)' }
-                        }
-                    }
-                }
-            });
         }
 
     } catch (error) {
@@ -672,11 +653,46 @@ window.verDetalleMantencionConductor = function(index) {
 document.addEventListener('DOMContentLoaded', () => {
     // Configurar fecha actual
     const dateOpts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('es-ES', dateOpts);
+    const dateStr = new Date().toLocaleDateString('es-ES', dateOpts);
+    if (document.getElementById('currentDate')) document.getElementById('currentDate').textContent = dateStr;
+    if (document.getElementById('heroCurrDate')) document.getElementById('heroCurrDate').textContent = dateStr;
 
     const user = JSON.parse(localStorage.getItem('serfover_user'));
-    if (user && document.getElementById('dashDriverName')) {
-        document.getElementById('dashDriverName').textContent = user.name;
+    if (user) {
+        // Nombre
+        const nameEl = document.getElementById('dashDriverName');
+        if (nameEl) nameEl.textContent = user.name || 'Conductor';
+
+        // Inicial / foto de perfil
+        const heroInitial = document.getElementById('heroAvatarInitial');
+        const heroImg = document.getElementById('heroProfileImg');
+        const bnavAvatar = document.getElementById('bnavAvatar');
+        const initial = (user.name || 'C').charAt(0).toUpperCase();
+
+        if (heroInitial) heroInitial.textContent = initial;
+        if (bnavAvatar) bnavAvatar.textContent = initial;
+
+        // Foto de perfil (si está guardada en user.avatar como base64)
+        if (user.avatar) {
+            if (heroImg) {
+                heroImg.src = user.avatar;
+                heroImg.style.display = 'block';
+                if (heroInitial) heroInitial.style.display = 'none';
+            }
+            if (bnavAvatar) {
+                bnavAvatar.innerHTML = `<img src="${user.avatar}" alt="Avatar" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                bnavAvatar.style.background = 'transparent';
+                bnavAvatar.style.color = 'transparent';
+            }
+        }
+
+        // Patente del camión
+        const plateBadge = document.getElementById('heroPlateBadge');
+        const plateText = document.getElementById('heroPlateText');
+        if (user.truck && user.truck.trim() !== '' && plateBadge && plateText) {
+            plateText.textContent = user.truck.trim().toUpperCase();
+            plateBadge.style.display = 'inline-flex';
+        }
     }
 
     // Eliminar filtros por defecto del mes para mostrar todo el historial
@@ -693,7 +709,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if (repMovilInput) {
             repMovilInput.value = user.truck.trim();
         }
+        const combMovilInput = document.getElementById('combMovil');
+        if (combMovilInput) {
+            combMovilInput.value = user.truck.trim();
+        }
     }
+    
+    window.showSuccessScreen = function() {
+        const overlay = document.getElementById('successOverlay');
+        if (overlay) {
+            if (navigator.vibrate) navigator.vibrate(200); // Vibración si está disponible
+            overlay.style.display = 'flex';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                switchTab('inicio');
+                window.scrollTo(0, 0);
+            }, 2000);
+        } else {
+            showToast('¡Guardado con éxito!', 'success');
+            switchTab('inicio');
+        }
+    };
 
     // Configurar Datalist y Autocompletado de Kilometraje Inicial
     const repMovilInput = document.getElementById('repMovil');
@@ -757,14 +793,21 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             await API.sendData(payload);
-            window.setBtnLoading('btnSubmitReporte', false, 'Guardar Reporte');
-            showToast('¡Reporte guardado con éxito!', 'success');
+            window.setBtnLoading('btnSubmitReporte', false, 'Guardar Report');
+            
+            if (user) {
+                user.truck = payload.movil;
+                localStorage.setItem('serfover_user', JSON.stringify(user));
+            }
+            
             document.getElementById('formReporte').reset();
             document.getElementById('repPreview').style.display = 'none';
             // Restaurar móvil desde perfil
             if (user && user.truck) document.getElementById('repMovil').value = user.truck;
+            
+            window.showSuccessScreen();
         } catch (error) {
-            window.setBtnLoading('btnSubmitReporte', false, 'Guardar Reporte');
+            window.setBtnLoading('btnSubmitReporte', false, 'Guardar Report');
             showToast('Error al guardar: ' + error.message, 'error');
             statusEl.style.display = 'block';
             statusEl.innerHTML = '<span style="color: var(--accent-danger);">Error al guardar. Intenta nuevamente.</span>';
@@ -785,6 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = {
                 type: 'combustible',
                 driver: user ? user.name : 'Desconocido',
+                movil: document.getElementById('combMovil').value,
                 litros: document.getElementById('combLitros').value,
                 kilometraje: document.getElementById('combKm').value,
                 valor: document.getElementById('combValor').value,
@@ -794,9 +838,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             await API.sendData(payload);
             window.setBtnLoading('btnSubmitCombustible', false, 'Registrar Combustible');
-            showToast('¡Combustible registrado con éxito!', 'success');
+            
+            if (user) {
+                user.truck = payload.movil;
+                localStorage.setItem('serfover_user', JSON.stringify(user));
+            }
+            
             document.getElementById('formCombustible').reset();
             document.getElementById('combPreview').style.display = 'none';
+            if (user && user.truck) document.getElementById('combMovil').value = user.truck;
+            
+            window.showSuccessScreen();
         } catch (error) {
             window.setBtnLoading('btnSubmitCombustible', false, 'Registrar Combustible');
             showToast('Error al guardar: ' + error.message, 'error');
@@ -827,9 +879,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             await API.sendData(payload);
             window.setBtnLoading('btnSubmitMantencion', false, 'Registrar Mantención');
-            showToast('¡Mantención registrada con éxito!', 'success');
             document.getElementById('formMantencion').reset();
             document.getElementById('mantPreview').style.display = 'none';
+            window.showSuccessScreen();
         } catch (error) {
             window.setBtnLoading('btnSubmitMantencion', false, 'Registrar Mantención');
             showToast('Error al guardar: ' + error.message, 'error');

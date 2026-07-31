@@ -14,6 +14,48 @@ class SERFOVER_API {
                 reportes: [], combustibles: [], mantenciones: []
             }));
         }
+        if (!localStorage.getItem('serfover_offline_queue')) {
+            localStorage.setItem('serfover_offline_queue', JSON.stringify([]));
+        }
+        
+        // Listen for online event to sync queue
+        window.addEventListener('online', () => this.syncOfflineQueue());
+    }
+    
+    async syncOfflineQueue() {
+        if (!navigator.onLine) return;
+        
+        let queue = [];
+        try {
+            queue = JSON.parse(localStorage.getItem('serfover_offline_queue')) || [];
+        } catch (e) { queue = []; }
+        
+        if (queue.length === 0) return;
+        
+        console.log(`Syncing ${queue.length} items from offline queue...`);
+        const newQueue = [];
+        for (const payload of queue) {
+            try {
+                const targetUrl = this._getUrl(payload.type);
+                await fetch(targetUrl, {
+                    method: 'POST',
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain' },
+                    mode: 'no-cors'
+                });
+                console.log(`Synced offline item: ${payload.type}`);
+            } catch (error) {
+                console.error('Error syncing offline item, keeping in queue', error);
+                newQueue.push(payload);
+            }
+        }
+        localStorage.setItem('serfover_offline_queue', JSON.stringify(newQueue));
+        
+        if (newQueue.length === 0 && queue.length > 0) {
+            if (typeof window.showToast === 'function') {
+                window.showToast('✅ Datos offline sincronizados', 'success');
+            }
+        }
     }
 
     _getUrl(type) {
@@ -21,6 +63,11 @@ class SERFOVER_API {
     }
 
     async sendData(payload) {
+        if (!navigator.onLine) {
+            this._queueOffline(payload);
+            return { status: 'offline_queued' };
+        }
+        
         try {
             const targetUrl = this._getUrl(payload.type);
             const response = await fetch(targetUrl, {
@@ -31,8 +78,23 @@ class SERFOVER_API {
             });
             return { status: 'success' };
         } catch (error) {
-            console.error('Error enviando datos:', error);
-            throw error;
+            console.error('Error enviando datos (posible fallo de red), guardando offline:', error);
+            this._queueOffline(payload);
+            return { status: 'offline_queued' };
+        }
+    }
+    
+    _queueOffline(payload) {
+        try {
+            let queue = JSON.parse(localStorage.getItem('serfover_offline_queue')) || [];
+            queue.push(payload);
+            localStorage.setItem('serfover_offline_queue', JSON.stringify(queue));
+            if (typeof window.showToast === 'function') {
+                window.showToast('Sin conexión. Guardado en cola para enviar luego.', 'warning');
+            }
+        } catch (e) {
+            console.error('Error guardando en cola offline (probablemente límite de almacenamiento)', e);
+            throw new Error('Almacenamiento lleno. No se pudo guardar offline.');
         }
     }
 

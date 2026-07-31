@@ -1777,7 +1777,6 @@ tbody tr:hover {
 @media (max-width: 768px) {
     .bottom-nav { display: flex; }
     .app-container { padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px)) !important; }
-    .mobile-menu-btn { display: none !important; }
     .mobile-logout { display: none !important; }
     #toastContainer { bottom: calc(var(--bottom-nav-height) + 12px) !important; right: 12px; left: 12px; }
     .fab-chat { bottom: calc(var(--bottom-nav-height) + 16px) !important; }
@@ -2215,12 +2214,105 @@ tbody tr:hover {
 @media (max-width: 768px) {
     .bottom-nav { display: flex; }
     .app-container { padding-bottom: calc(var(--bottom-nav-height, 64px) + 8px); }
-    .mobile-menu-btn { display: none !important; }
     #toastContainer { bottom: calc(var(--bottom-nav-height, 64px) + 12px); }
-    .sidebar { display: none; }
 }
 @media (min-width: 769px) {
     .bottom-nav { display: none !important; }
+}
+
+/* ─── DRIVER HERO CARD ─── */
+.driver-hero-card {
+    background: linear-gradient(135deg, rgba(0,255,136,0.08) 0%, rgba(10,13,20,0.95) 60%);
+    border-bottom: 1px solid rgba(0,255,136,0.15);
+    padding: 1.25rem 1rem 1.1rem;
+    margin-bottom: 0;
+}
+.driver-hero-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+.driver-hero-left {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex: 1;
+    min-width: 0;
+}
+.driver-hero-avatar {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: rgba(0,255,136,0.1);
+    border: 2px solid rgba(0,255,136,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    box-shadow: 0 0 18px rgba(0,255,136,0.18);
+}
+.driver-hero-info {
+    min-width: 0;
+}
+.driver-hero-info h2 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.driver-plate-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(0,255,136,0.1);
+    border: 1px solid rgba(0,255,136,0.3);
+    color: var(--neon-green);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+.driver-hero-date {
+    flex-shrink: 0;
+    max-width: 90px;
+}
+
+/* ─── DRIVER QUICK BUTTONS ─── */
+.driver-quick-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 1rem 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-family);
+    color: var(--text-primary);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 0.2px;
+}
+.driver-quick-btn:hover, .driver-quick-btn:active {
+    background: rgba(0,255,136,0.06);
+    border-color: rgba(0,255,136,0.3);
+    transform: translateY(-2px);
+}
+.driver-quick-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
 /* ─── STEPPER FORM ─── */
