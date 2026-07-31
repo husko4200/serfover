@@ -193,48 +193,7 @@
                                 </div>
                             </div>
                             
-                            <!-- Ranking Completo de Flota -->
-                            <div class="card" style="margin-bottom: 2rem;">
-                                <div class="card-header">
-                                    <h3 class="card-title">🏆 Top Flota (Mes Actual)</h3>
-                                </div>
-                                <div style="padding: 1rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                                    
-                                    <div class="ranking-card ranking-card-inner">
-                                        <h4 style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Camión con Más Viajes</h4>
-                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                            <div style="font-size: 1.75rem; background: rgba(59,130,246,0.1); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">🔄</div>
-                                            <div>
-                                                <p id="rankDriverMostTrips" style="font-weight: 600; color: var(--text-primary); font-size: 1.1rem;">-</p>
-                                                <p id="rankDriverMostTripsVal" style="font-size: 0.8rem; color: var(--brand-secondary);">0 viajes</p>
-                                            </div>
-                                        </div>
-                                    </div>
 
-                                    <div class="ranking-card ranking-card-inner">
-                                        <h4 style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Camión Más Gastador</h4>
-                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                            <div style="font-size: 1.75rem; background: rgba(239,68,68,0.1); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">⛽</div>
-                                            <div>
-                                                <p id="rankDriverTopFuel" style="font-weight: 600; color: var(--text-primary); font-size: 1.1rem;">-</p>
-                                                <p id="rankDriverTopFuelVal" style="font-size: 0.8rem; color: var(--accent-danger);">$0</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="ranking-card ranking-card-inner">
-                                        <h4 style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Camión con Más Fallas</h4>
-                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                            <div style="font-size: 1.75rem; background: rgba(245,158,11,0.1); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">🔧</div>
-                                            <div>
-                                                <p id="rankDriverTopMant" style="font-weight: 600; color: var(--text-primary); font-size: 1.1rem;">-</p>
-                                                <p id="rankDriverTopMantVal" style="font-size: 0.8rem; color: var(--accent-warning);">0 mantenciones</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
 
                             <!-- Gráfico de Rendimiento -->
                             <div class="card" style="margin-bottom: 2rem;">
@@ -358,14 +317,7 @@
                                     <h4 class="step-title">
                                         <span class="step-num">03</span> Estado y Observaciones
                                     </h4>
-                                    <div class="form-group">
-                                        <label style="margin-bottom: 0.5rem; display:block;">Estado Rápido</label>
-                                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                                            <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--brand-primary); color:var(--text-primary); flex: 1;" onclick="setDriverStatus('🟢 En Ruta', this)">🟢 En Ruta</button>
-                                            <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--accent-warning); color:var(--text-primary); flex: 1;" onclick="setDriverStatus('🟡 Pausa', this)">🟡 Pausa</button>
-                                            <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--brand-secondary); color:var(--text-primary); flex: 1;" onclick="setDriverStatus('🔵 Destino', this)">🔵 Destino</button>
-                                        </div>
-                                    </div>
+
                                     <div class="form-group">
                                         <label>Observaciones</label>
                                         <textarea id="repObservaciones" rows="3" placeholder="Escribe detalles o selecciona un estado arriba..."></textarea>
@@ -379,9 +331,9 @@
                                 <!-- STEP 4 -->
                                 <div class="stepper-step" id="step4">
                                     <h4 class="step-title">
-                                        <span class="step-num">04</span> Evidencia Fotográfica
+                                        <span class="step-num">04</span> Foto de Guía
                                     </h4>
-                                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">La evidencia es obligatoria para enviar el reporte.</p>
+                                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">La foto de guía es obligatoria para enviar el reporte.</p>
                                     <div class="form-group">
                                         <div class="file-upload" onclick="document.getElementById('repImagen').click()">
                                             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>

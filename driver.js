@@ -94,26 +94,7 @@ function previewImage(input, previewContainerId) {
     }
 }
 
-// Botones de estado rápido
-function setDriverStatus(statusText, btnElement) {
-    const obs = document.getElementById('repObservaciones');
-    if(obs) {
-        // Evitar duplicados del mismo estado
-        if(!obs.value.includes(`[Estado: ${statusText}]`)) {
-            obs.value = `[Estado: ${statusText}]\n` + obs.value;
-        }
-    }
-    // Resaltar botón seleccionado
-    if(btnElement) {
-        const parent = btnElement.parentElement;
-        parent.querySelectorAll('.btn').forEach(b => {
-            b.style.transform = 'scale(1)';
-            b.style.fontWeight = 'normal';
-        });
-        btnElement.style.transform = 'scale(1.05)';
-        btnElement.style.fontWeight = 'bold';
-    }
-}
+
 
 // Convertir archivo a Base64 para enviar
 function getBase64(file) {
@@ -282,7 +263,7 @@ async function loadDriverHistory() {
             el.innerHTML = '<span style="font-size: 0.9rem; color: var(--text-muted);">Cargando...</span>';
         }
     };
-    ['driverStatViajes', 'driverStatMant', 'driverStatGastoComb', 'driverStatGastoMant', 'driverStatKmTotales', 'rankDriverMostTrips', 'rankDriverMostTripsVal', 'rankDriverTopFuel', 'rankDriverTopFuelVal', 'rankDriverTopMant', 'rankDriverTopMantVal'].forEach(setCargando);
+    ['driverStatViajes', 'driverStatMant', 'driverStatGastoComb', 'driverStatGastoMant', 'driverStatKmTotales'].forEach(setCargando);
 
     try {
         const data = await API.getData();
@@ -520,52 +501,7 @@ async function loadDriverHistory() {
             }
         }
 
-        // --- Ranking Completo de Flota ---
-        const truckTripsMap = {};
-        const truckFuelMap = {};
-        const truckMantMap = {};
 
-        (data.reportes || []).forEach(r => {
-            const d = new Date(r.fecha);
-            if(d.getFullYear() === currentYearStat && d.getMonth() === currentMonthStat) {
-                let m = getMovilFromDesc(r.descripcion) || r.movil || r._movil || 'Desconocido';
-                if (m !== 'Desconocido') truckTripsMap[m] = (truckTripsMap[m] || 0) + 1;
-            }
-        });
-
-        (data.combustibles || []).forEach(c => {
-            const d = new Date(c.fecha);
-            if(d.getFullYear() === currentYearStat && d.getMonth() === currentMonthStat) {
-                let m = c.movil || c._movil || 'Desconocido';
-                if (m !== 'Desconocido') truckFuelMap[m] = (truckFuelMap[m] || 0) + parseFloat(c.valorTotal || c.valor || 0);
-            }
-        });
-
-        (data.mantenciones || []).forEach(m => {
-            const d = new Date(m.fecha);
-            if(d.getFullYear() === currentYearStat && d.getMonth() === currentMonthStat) {
-                let mvl = getMovilFromDesc(m.descripcion) || m.movil || m._movil || 'Desconocido';
-                if (mvl !== 'Desconocido') truckMantMap[mvl] = (truckMantMap[mvl] || 0) + 1;
-            }
-        });
-
-        const topTripsTruck = Object.entries(truckTripsMap).sort((a, b) => b[1] - a[1])[0];
-        if (topTripsTruck && document.getElementById('rankDriverMostTrips')) {
-            document.getElementById('rankDriverMostTrips').textContent = topTripsTruck[0];
-            document.getElementById('rankDriverMostTripsVal').textContent = topTripsTruck[1] + ' viajes';
-        }
-
-        const topFuelTruck = Object.entries(truckFuelMap).sort((a, b) => b[1] - a[1])[0];
-        if (topFuelTruck && document.getElementById('rankDriverTopFuel')) {
-            document.getElementById('rankDriverTopFuel').textContent = topFuelTruck[0];
-            document.getElementById('rankDriverTopFuelVal').textContent = '$' + parseInt(topFuelTruck[1]).toLocaleString('es-CL');
-        }
-
-        const topMantTruck = Object.entries(truckMantMap).sort((a, b) => b[1] - a[1])[0];
-        if (topMantTruck && document.getElementById('rankDriverTopMant')) {
-            document.getElementById('rankDriverTopMant').textContent = topMantTruck[0];
-            document.getElementById('rankDriverTopMantVal').textContent = topMantTruck[1] + ' mantenciones';
-        }
 
         // --- Gráfico 1: Distribución de Gastos (Mes Actual) ---
         if (window._driverExpensesChartInst) window._driverExpensesChartInst.destroy();
