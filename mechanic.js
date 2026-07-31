@@ -342,8 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const imageFile = document.getElementById('mantImagenMech').files[0];
             const base64Image = await getBase64(imageFile);
 
-            // Recopilar prioridad y checklist
-            const prioridad = document.getElementById('mantPrioridad').value || 'Ninguna';
+            // Recopilar checklist
             const checklistBtns = document.querySelectorAll('#mechChecklist .btn');
             let checklistSummary = '';
             checklistBtns.forEach(btn => {
@@ -353,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            const finalDescription = `[Prioridad: ${prioridad}] ${checklistSummary ? '\\n[Checklist: ' + checklistSummary + ']' : ''}\\nMóvil: ${document.getElementById('mantMovil').value}. Conductor: ${document.getElementById('mantConductor').value || 'Desconocido'}. ` + document.getElementById('mantDesc').value;
+            const finalDescription = `${checklistSummary ? '[Checklist: ' + checklistSummary + ']\\n' : ''}Móvil: ${document.getElementById('mantMovil').value}. Conductor: ${document.getElementById('mantConductor').value || 'Desconocido'}. ` + document.getElementById('mantDesc').value;
 
             const payload = {
                 type: 'mantencion',
@@ -383,16 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // --- Funciones UX Mecánico ---
-function setMechPriority(priority, btn) {
-    document.getElementById('mantPrioridad').value = priority;
-    const parent = btn.parentElement;
-    parent.querySelectorAll('.btn').forEach(b => {
-        b.style.transform = 'scale(1)';
-        b.style.fontWeight = 'normal';
-    });
-    btn.style.transform = 'scale(1.05)';
-    btn.style.fontWeight = 'bold';
-}
+
 
 function toggleChecklist(itemName, btn) {
     const currentText = btn.innerText;

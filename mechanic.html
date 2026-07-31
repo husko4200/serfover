@@ -9,6 +9,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="serfover_logo.png">
 </head>
 <body>
     <div class="app-container">
@@ -224,16 +227,7 @@
                                 <label>Kilometraje al momento</label>
                                 <input type="number" id="mantKm" required>
                             </div>
-                            <div class="form-group" style="grid-column: 1 / -1;">
-                                <label style="margin-bottom: 0.5rem; display:block;">Prioridad de Reparación</label>
-                                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" id="prioritySelector">
-                                    <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--accent-danger); color:var(--text-primary); flex: 1;" onclick="setMechPriority('🔴 Urgente', this)">🔴 Urgente</button>
-                                    <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--accent-warning); color:var(--text-primary); flex: 1;" onclick="setMechPriority('🟡 Programable', this)">🟡 Programable</button>
-                                    <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--brand-primary); color:var(--text-primary); flex: 1;" onclick="setMechPriority('🟢 Menor', this)">🟢 Menor</button>
-                                </div>
-                                <!-- Hidden input to store priority -->
-                                <input type="hidden" id="mantPrioridad" value="">
-                            </div>
+
 
                             <div class="form-group" style="grid-column: 1 / -1;">
                                 <label style="margin-bottom: 0.5rem; display:block;">Checklist Pre-operacional (Rápido)</label>
@@ -390,5 +384,16 @@
         </form>
     </div>
     <script src="social.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(registration => {
+                    console.log('SW registered: ', registration.scope);
+                }).catch(err => {
+                    console.log('SW registration failed: ', err);
+                });
+            });
+        }
+    </script>
 </body>
 </html>
