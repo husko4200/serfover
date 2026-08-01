@@ -12,6 +12,23 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2563eb">
     <link rel="apple-touch-icon" href="serfover_logo.png">
+    <style>
+        /* Fondo personalizado con la imagen del bosque y un filtro oscuro para legibilidad */
+        body {
+            background-image: linear-gradient(rgba(14, 18, 25, 0.4), rgba(14, 18, 25, 0.4)), url('forest_bg.png') !important;
+            background-size: cover !important;
+            background-position: center !important; 
+            background-repeat: no-repeat !important;
+            background-attachment: fixed !important;
+        }
+        
+        /* Oscurecer los cuadros y botones para que resalten más sobre el fondo */
+        .driver-hero-card, .action-card, .stat-card, .card, .history-card, .form-container {
+            background-color: rgba(10, 13, 20, 0.92) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            backdrop-filter: blur(12px) !important;
+        }
+    </style>
 </head>
 <body>
     <div class="app-container">

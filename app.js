@@ -16,22 +16,49 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Inicializar base de usuarios por defecto si no existe o si es formato viejo
+    const defaultUsers = [
+        { username: 'alex', password: 'alex2026', role: 'owner', name: 'Alex', avatar: '', truck: '' },
+        { username: 'camilo', password: 'camilo2026', role: 'driver', name: 'Camilo Vergara', avatar: 'camilo_avatar.png', truck: 'PSJK55' },
+        { username: 'eladio', password: 'eladio2020', role: 'driver', name: 'Eladio Alvarez', avatar: '', truck: 'DLZP45' },
+        { username: 'deivid', password: 'deivid2010', role: 'mechanic', name: 'Deivid Alexis', avatar: '', truck: '' },
+        { username: 'cesar', password: 'cesar2011', role: 'driver', name: 'Cesar Valdebenito', avatar: '', truck: 'PSJK56' },
+        { username: 'alex2', password: 'alex2026', role: 'driver', name: 'Alex Vergara', avatar: 'alex2_avatar.png', truck: 'KZPH75' }
+    ];
+
     const existingUsers = localStorage.getItem('serfover_users');
     let needsInit = !existingUsers;
+    let usersArray = [];
     if (existingUsers) {
         try {
-            const parsed = JSON.parse(existingUsers);
-            if (parsed.length > 0 && !parsed[0].hasOwnProperty('username')) needsInit = true;
+            usersArray = JSON.parse(existingUsers);
+            if (usersArray.length > 0 && !usersArray[0].hasOwnProperty('username')) needsInit = true;
         } catch(e) { needsInit = true; }
     }
+    
     if (needsInit) {
-        const defaultUsers = [
-            { username: 'alex', password: 'alex2026', role: 'owner', name: 'Alex', avatar: '', truck: '' },
-            { username: 'camilo', password: 'camilo2026', role: 'driver', name: 'Camilo Vergara', avatar: '', truck: '' },
-            { username: 'eladio', password: 'eladio2020', role: 'driver', name: 'Eladio Alvarez', avatar: '', truck: '' },
-            { username: 'deivid', password: 'deivid2010', role: 'mechanic', name: 'Deivid Alexis', avatar: '', truck: '' }
-        ];
         localStorage.setItem('serfover_users', JSON.stringify(defaultUsers));
+    } else {
+        // Asegurarse de que los usuarios por defecto que falten se agreguen, y actualizar patentes/avatares si están vacías
+        let updated = false;
+        defaultUsers.forEach(du => {
+            const existingUser = usersArray.find(u => u.username === du.username);
+            if (!existingUser) {
+                usersArray.push(du);
+                updated = true;
+            } else {
+                if (du.truck && (!existingUser.truck || existingUser.truck.trim() === '')) {
+                    existingUser.truck = du.truck;
+                    updated = true;
+                }
+                if (du.avatar && (!existingUser.avatar || existingUser.avatar.trim() === '')) {
+                    existingUser.avatar = du.avatar;
+                    updated = true;
+                }
+            }
+        });
+        if (updated) {
+            localStorage.setItem('serfover_users', JSON.stringify(usersArray));
+        }
     }
 
     // Migrar sesión antigua (formato sin 'username') a la nueva

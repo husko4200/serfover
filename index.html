@@ -41,11 +41,40 @@
                 </button>
             </form>
         </div>
+        <!-- Botón de instalación PWA -->
+        <div id="pwaInstallWrapper" style="display:none; margin-top: 1rem; text-align: center;">
+            <button id="pwaInstallBtn" onclick="installPWA()" style="
+                display: inline-flex;
+                align-items: center;
+                gap: 0.6rem;
+                background: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(16,185,129,0.12));
+                border: 1px solid rgba(37,99,235,0.4);
+                color: #2563eb;
+                padding: 0.65rem 1.4rem;
+                border-radius: 50px;
+                font-size: 0.9rem;
+                font-weight: 600;
+                cursor: pointer;
+                font-family: 'Outfit', sans-serif;
+                transition: all 0.25s ease;
+                backdrop-filter: blur(10px);
+            "
+            onmouseover="this.style.background='linear-gradient(135deg, rgba(37,99,235,0.2), rgba(16,185,129,0.2))'; this.style.transform='translateY(-1px)';"
+            onmouseout="this.style.background='linear-gradient(135deg, rgba(37,99,235,0.12), rgba(16,185,129,0.12))'; this.style.transform='translateY(0)';">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v13M7 9l5 5 5-5"/>
+                    <path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/>
+                </svg>
+                Instalar App en tu celular
+            </button>
+            <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.4rem;">Agrégala a tu pantalla de inicio para acceso rápido</p>
+        </div>
         <p class="login-light-footer">SERFOVER &copy; 2026 — Logística Forestal</p>
     </div>
 
     <script src="app.js"></script>
     <script>
+        // Registrar Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').then(registration => {
@@ -55,6 +84,33 @@
                 });
             });
         }
+
+        // Lógica de instalación PWA
+        let deferredPrompt = null;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // El navegador quiere mostrarte el banner, lo capturamos
+            e.preventDefault();
+            deferredPrompt = e;
+            // Mostrar nuestro botón personalizado
+            document.getElementById('pwaInstallWrapper').style.display = 'block';
+        });
+
+        window.installPWA = async function() {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                document.getElementById('pwaInstallWrapper').style.display = 'none';
+            }
+            deferredPrompt = null;
+        };
+
+        // Si ya está instalada como PWA, ocultar el botón
+        window.addEventListener('appinstalled', () => {
+            document.getElementById('pwaInstallWrapper').style.display = 'none';
+            deferredPrompt = null;
+        });
     </script>
 </body>
 </html>
