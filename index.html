@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login — SERFOVER</title>
+    <meta name="description" content="Accede al sistema de logística forestal SERFOVER.">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
@@ -11,7 +12,7 @@
     <link rel="apple-touch-icon" href="serfover_logo.png">
 </head>
 <body class="login-light-body">
-    
+
     <div class="login-light-container">
         <div class="login-light-card">
             <div class="login-light-header">
@@ -19,37 +20,70 @@
                 <h1>Bienvenido a SERFOVER</h1>
                 <p>Ingresa tus credenciales para acceder a la flota</p>
             </div>
-            
-            <form id="loginForm" class="login-light-form">
+
+            <form id="loginForm" class="login-light-form" novalidate>
+
+                <!-- Campo Usuario con ícono -->
                 <div class="input-group">
                     <label for="username">Usuario</label>
-                    <input type="text" id="username" name="username" placeholder="Ingresar usuario" required autocomplete="username">
+                    <div class="input-icon-wrap">
+                        <span class="input-icon-left">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </span>
+                        <input type="text" id="username" name="username" placeholder="Usuario" required autocomplete="username">
+                    </div>
                 </div>
-                
+
+                <!-- Campo Contraseña con ícono + ojo -->
                 <div class="input-group">
                     <label for="password">Contraseña</label>
-                    <input type="password" id="password" name="password" placeholder="Ingresar clave" required autocomplete="current-password">
+                    <div class="input-icon-wrap">
+                        <span class="input-icon-left">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                            </svg>
+                        </span>
+                        <input type="password" id="password" name="password" placeholder="Contraseña" required autocomplete="current-password">
+                        <button type="button" id="togglePasswordBtn" class="input-eye-btn" aria-label="Mostrar contraseña">
+                            <svg id="eyeOpen" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                <circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            <svg id="eyeClosed" style="display:none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                                <line x1="1" y1="1" x2="23" y2="23"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <div id="loginError" class="login-error-msg" style="display: none;">
                     Usuario o contraseña incorrectos.
                 </div>
-                
-                <button type="submit" class="btn-login-light">
+
+                <button type="submit" id="loginSubmitBtn" class="btn-login-light">
                     Ingresar al Sistema
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    <svg class="btn-login-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
                 </button>
             </form>
         </div>
+
         <!-- Botón de instalación PWA -->
         <div id="pwaInstallWrapper" style="display:none; margin-top: 1rem; text-align: center;">
             <button id="pwaInstallBtn" onclick="installPWA()" style="
                 display: inline-flex;
                 align-items: center;
                 gap: 0.6rem;
-                background: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(16,185,129,0.12));
-                border: 1px solid rgba(37,99,235,0.4);
-                color: #2563eb;
+                background: rgba(255,255,255,0.85);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(37,99,235,0.3);
+                color: #1a4a2e;
                 padding: 0.65rem 1.4rem;
                 border-radius: 50px;
                 font-size: 0.9rem;
@@ -57,56 +91,44 @@
                 cursor: pointer;
                 font-family: 'Outfit', sans-serif;
                 transition: all 0.25s ease;
-                backdrop-filter: blur(10px);
             "
-            onmouseover="this.style.background='linear-gradient(135deg, rgba(37,99,235,0.2), rgba(16,185,129,0.2))'; this.style.transform='translateY(-1px)';"
-            onmouseout="this.style.background='linear-gradient(135deg, rgba(37,99,235,0.12), rgba(16,185,129,0.12))'; this.style.transform='translateY(0)';">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            onmouseover="this.style.background='rgba(255,255,255,0.95)'; this.style.transform='translateY(-1px)';"
+            onmouseout="this.style.background='rgba(255,255,255,0.85)'; this.style.transform='translateY(0)';">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 2v13M7 9l5 5 5-5"/>
                     <path d="M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"/>
                 </svg>
                 Instalar App en tu celular
             </button>
-            <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.4rem;">Agrégala a tu pantalla de inicio para acceso rápido</p>
+            <p style="font-size: 0.75rem; color: rgba(255,255,255,0.75); margin-top: 0.4rem; text-shadow: 0 1px 3px rgba(0,0,0,0.4);">Agrégala a tu pantalla de inicio para acceso rápido</p>
         </div>
+
         <p class="login-light-footer">SERFOVER &copy; 2026 — Logística Forestal</p>
     </div>
 
     <script src="app.js"></script>
     <script>
-        // Registrar Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(registration => {
-                    console.log('SW registered: ', registration.scope);
-                }).catch(err => {
-                    console.log('SW registration failed: ', err);
-                });
+                navigator.serviceWorker.register('sw.js')
+                    .then(r => console.log('SW registered:', r.scope))
+                    .catch(e => console.log('SW error:', e));
             });
         }
 
-        // Lógica de instalación PWA
         let deferredPrompt = null;
-
         window.addEventListener('beforeinstallprompt', (e) => {
-            // El navegador quiere mostrarte el banner, lo capturamos
             e.preventDefault();
             deferredPrompt = e;
-            // Mostrar nuestro botón personalizado
             document.getElementById('pwaInstallWrapper').style.display = 'block';
         });
-
         window.installPWA = async function() {
             if (!deferredPrompt) return;
             deferredPrompt.prompt();
             const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                document.getElementById('pwaInstallWrapper').style.display = 'none';
-            }
+            if (outcome === 'accepted') document.getElementById('pwaInstallWrapper').style.display = 'none';
             deferredPrompt = null;
         };
-
-        // Si ya está instalada como PWA, ocultar el botón
         window.addEventListener('appinstalled', () => {
             document.getElementById('pwaInstallWrapper').style.display = 'none';
             deferredPrompt = null;
