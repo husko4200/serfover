@@ -2634,7 +2634,9 @@ tbody tr:hover {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    background: var(--glass-bg);
+    background: var(--glass-bg-strong);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
     padding: 1rem 0.5rem;

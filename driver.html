@@ -15,15 +15,23 @@
     <style>
         /* Fondo personalizado con la imagen del bosque y un filtro oscuro para legibilidad */
         body {
-            background-image: linear-gradient(rgba(14, 18, 25, 0.4), rgba(14, 18, 25, 0.4)), url('forest_bg.png') !important;
+            background-color: #0a0d14 !important;
+            background-image: linear-gradient(rgba(14, 18, 25, 0.4), rgba(14, 18, 25, 0.4)), url('forest_bg_premium.png') !important;
             background-size: cover !important;
             background-position: center !important; 
             background-repeat: no-repeat !important;
             background-attachment: fixed !important;
         }
         
+        /* Desactivar 'fixed' en móviles para evitar el bug de zoom extremo en iOS Safari */
+        @media (max-width: 768px) {
+            body {
+                background-attachment: scroll !important;
+            }
+        }
+        
         /* Oscurecer los cuadros y botones para que resalten más sobre el fondo */
-        .driver-hero-card, .driver-quick-btn, .card {
+        .driver-hero-card, .card {
             background-color: rgba(10, 13, 20, 0.92) !important;
             border: 1px solid rgba(255, 255, 255, 0.05) !important;
             backdrop-filter: blur(12px) !important;

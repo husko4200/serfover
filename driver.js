@@ -390,6 +390,13 @@ async function loadDriverHistory() {
         // --- Historial de Combustibles ---
         let misCombustibles = (data.combustibles || []).filter(c => c.driver === user.name);
         
+        // Mapear móvil si falta en los registros de combustible
+        misCombustibles.forEach(c => {
+            if (!c.movil && user.truck && user.truck.trim() !== '') {
+                c.movil = user.truck.trim().toUpperCase();
+            }
+        });
+        
         if (combMonthVal) {
             const [year, month] = combMonthVal.split('-');
             misCombustibles = misCombustibles.filter(c => {
@@ -715,19 +722,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    window.showSuccessScreen = function() {
+    window.showSuccessScreen = function(targetTab) {
+        const tab = targetTab || 'historial';
         const overlay = document.getElementById('successOverlay');
         if (overlay) {
             if (navigator.vibrate) navigator.vibrate(200); // Vibración si está disponible
             overlay.style.display = 'flex';
             setTimeout(() => {
                 overlay.style.display = 'none';
-                switchTab('inicio');
+                switchTab(tab);
                 window.scrollTo(0, 0);
             }, 2000);
         } else {
             showToast('¡Guardado con éxito!', 'success');
-            switchTab('inicio');
+            switchTab(tab);
         }
     };
 
@@ -805,7 +813,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Restaurar móvil desde perfil
             if (user && user.truck) document.getElementById('repMovil').value = user.truck;
             
-            window.showSuccessScreen();
+            window.showSuccessScreen('historial');
         } catch (error) {
             window.setBtnLoading('btnSubmitReporte', false, 'Guardar Report');
             showToast('Error al guardar: ' + error.message, 'error');
@@ -848,7 +856,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('combPreview').style.display = 'none';
             if (user && user.truck) document.getElementById('combMovil').value = user.truck;
             
-            window.showSuccessScreen();
+            window.showSuccessScreen('historial-comb');
         } catch (error) {
             window.setBtnLoading('btnSubmitCombustible', false, 'Registrar Combustible');
             showToast('Error al guardar: ' + error.message, 'error');
@@ -881,7 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.setBtnLoading('btnSubmitMantencion', false, 'Registrar Mantención');
             document.getElementById('formMantencion').reset();
             document.getElementById('mantPreview').style.display = 'none';
-            window.showSuccessScreen();
+            window.showSuccessScreen('historial-mant');
         } catch (error) {
             window.setBtnLoading('btnSubmitMantencion', false, 'Registrar Mantención');
             showToast('Error al guardar: ' + error.message, 'error');

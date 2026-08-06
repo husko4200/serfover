@@ -83,28 +83,182 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const loginError = document.getElementById('loginError');
 
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const usernameInput = document.getElementById('username').value.toLowerCase().trim();
-            const passwordInput = document.getElementById('password').value;
-            
-            const users = JSON.parse(localStorage.getItem('serfover_users')) || [];
-            const foundUser = users.find(u => u.username === usernameInput && u.password === passwordInput);
+    // Lógica Premium de Login
+    if (pageContext === 'login') {
+        // Inicializar partículas en canvas
+        initParticles();
 
-            if (foundUser) {
-                // Guardamos la sesión (copia del usuario sin la contraseña por seguridad en la sesión, aunque acá es local)
-                const sessionUser = { ...foundUser };
-                localStorage.setItem('serfover_user', JSON.stringify(sessionUser));
+        // Mostrar/Ocultar contraseña
+        const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+        const passwordInput = document.getElementById('password');
+        const eyeIconOpen = document.getElementById('eyeIconOpen');
+        const eyeIconClosed = document.getElementById('eyeIconClosed');
+
+        if (togglePasswordBtn && passwordInput) {
+            togglePasswordBtn.addEventListener('click', () => {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    eyeIconOpen.style.display = 'none';
+                    eyeIconClosed.style.display = 'block';
+                } else {
+                    passwordInput.type = 'password';
+                    eyeIconOpen.style.display = 'block';
+                    eyeIconClosed.style.display = 'none';
+                }
+            });
+        }
+
+        // Cargar credenciales guardadas si existe 'Remember Me'
+        const savedCreds = localStorage.getItem('serfover_remember');
+        if (savedCreds) {
+            const creds = JSON.parse(savedCreds);
+            document.getElementById('username').value = creds.u || '';
+            document.getElementById('password').value = creds.p || '';
+            const rememberMeCheck = document.getElementById('rememberMe');
+            if(rememberMeCheck) rememberMeCheck.checked = true;
+        }
+
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
                 
-                if (foundUser.role === 'owner') window.location.href = 'dashboard.html';
-                else if (foundUser.role === 'mechanic') window.location.href = 'mechanic.html';
-                else window.location.href = 'driver.html';
-            } else {
-                loginError.style.display = 'block';
+                const usernameInputEl = document.getElementById('username');
+                const passwordInputEl = document.getElementById('password');
+                const usernameInput = usernameInputEl.value.toLowerCase().trim();
+                const passwordInput = passwordInputEl.value;
+                const rememberMeCheck = document.getElementById('rememberMe');
+                
+                const btn = document.getElementById('loginSubmitBtn');
+                const btnText = btn.querySelector('.btn-text');
+                const btnArrow = btn.querySelector('.btn-arrow');
+                const btnSpinner = btn.querySelector('.btn-spinner');
+
+                // Estado de carga UI
+                btn.disabled = true;
+                btnText.textContent = "Validando...";
+                btnArrow.style.display = 'none';
+                btnSpinner.style.display = 'block';
+                loginError.style.display = 'none';
+                loginError.classList.remove('shake');
+                
+                // Simular un pequeño delay de red para mostrar la animación
+                setTimeout(() => {
+                    const users = JSON.parse(localStorage.getItem('serfover_users')) || [];
+                    const foundUser = users.find(u => u.username === usernameInput && u.password === passwordInput);
+
+                    if (foundUser) {
+                        // Remember Me
+                        if (rememberMeCheck && rememberMeCheck.checked) {
+                            localStorage.setItem('serfover_remember', JSON.stringify({ u: usernameInput, p: passwordInput }));
+                        } else {
+                            localStorage.removeItem('serfover_remember');
+                        }
+
+                        // Guardamos la sesión
+                        const sessionUser = { ...foundUser };
+                        localStorage.setItem('serfover_user', JSON.stringify(sessionUser));
+                        
+                        btnText.textContent = "Accediendo...";
+                        setTimeout(() => {
+                            if (foundUser.role === 'owner') window.location.href = 'dashboard.html';
+                            else if (foundUser.role === 'mechanic') window.location.href = 'mechanic.html';
+                            else window.location.href = 'driver.html';
+                        }, 500);
+                    } else {
+                        // Error UI
+                        loginError.style.display = 'flex';
+                        // Force reflow to restart animation
+                        void loginError.offsetWidth;
+                        loginError.classList.add('shake');
+                        
+                        btn.disabled = false;
+                        btnText.textContent = "Ingresar al Sistema";
+                        btnArrow.style.display = 'block';
+                        btnSpinner.style.display = 'none';
+                        passwordInputEl.value = ''; // Limpiar contraseña en caso de error
+                    }
+                }, 800); // 800ms de animación
+            });
+        }
+    }
+
+    // --- Sistema de Partículas Canvas ---
+    function initParticles() {
+        const canvas = document.getElementById('particles-bg');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        
+        let width, height, particles;
+        
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = Math.random() * 1.5 + 0.5;
             }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                if (this.x < 0 || this.x > width) this.vx = -this.vx;
+                if (this.y < 0 || this.y > height) this.vy = -this.vy;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 255, 136, 0.5)';
+                ctx.fill();
+            }
+        }
+        
+        function createParticles() {
+            particles = [];
+            let numParticles = Math.min(Math.floor(window.innerWidth / 10), 100);
+            for (let i = 0; i < numParticles; i++) {
+                particles.push(new Particle());
+            }
+        }
+        
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+                
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < 120) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = `rgba(0, 255, 136, ${0.15 - (dist/120)*0.15})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        
+        window.addEventListener('resize', () => {
+            resize();
+            createParticles();
         });
+        
+        resize();
+        createParticles();
+        animate();
     }
 
     // Funciones globales para manejar perfil

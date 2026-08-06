@@ -183,6 +183,7 @@ async function loadMechanicData() {
         let misMantenciones = data.mantenciones || [];
 
         // Pre-procesar móvil y origen para filtrado
+        const usersList = JSON.parse(localStorage.getItem('serfover_users')) || [];
         misMantenciones = misMantenciones.map(m => {
             let movil = 'Desconocido';
             if (m.descripcion && m.descripcion.includes('Móvil:')) {
@@ -190,6 +191,11 @@ async function loadMechanicData() {
                 if (match && match[1]) movil = match[1].trim();
             } else if (m.movil || m._movil) {
                 movil = m.movil || m._movil;
+            } else if (m.driver) {
+                const userObj = usersList.find(u => u.name === m.driver);
+                if (userObj && userObj.truck && userObj.truck.trim() !== '') {
+                    movil = userObj.truck.trim().toUpperCase();
+                }
             }
             
             const driverStr = m.driver || '';
@@ -260,6 +266,37 @@ async function loadMechanicData() {
         const elStatTopMovil = document.getElementById('mechStatTopMovil');
         if (elStatTopMovil) {
             elStatTopMovil.textContent = topMovilStats ? topMovilStats[0] : '-';
+        }
+
+        // --- MI RENDIMIENTO (Mecánico) ---
+        if (user && user.name) {
+            const misPropiasMant = (data.mantenciones || []).filter(m => m.driver && m.driver.includes(user.name));
+            
+            const kpiTotalEl = document.getElementById('mechKpiTotal');
+            if (kpiTotalEl) kpiTotalEl.textContent = misPropiasMant.length;
+            
+            const kpiMesEl = document.getElementById('mechKpiMes');
+            if (kpiMesEl) {
+                const mesActual = misPropiasMant.filter(m => {
+                    const d = new Date(m.fecha);
+                    return d.getFullYear() === currentYearStat && d.getMonth() === currentMonthStat;
+                });
+                kpiMesEl.textContent = mesActual.length;
+            }
+            
+            const kpiVehiculosEl = document.getElementById('mechKpiVehiculos');
+            if (kpiVehiculosEl) {
+                const vehiculosUnicos = new Set();
+                misPropiasMant.forEach(m => {
+                    let v = m.movil || m._movil;
+                    if (!v && m.descripcion && m.descripcion.includes('Móvil:')) {
+                        const match = m.descripcion.match(/Móvil:\s*([^.]+)\./);
+                        if (match && match[1]) v = match[1].trim();
+                    }
+                    if (v && v !== 'Desconocido') vehiculosUnicos.add(v.toUpperCase());
+                });
+                kpiVehiculosEl.textContent = vehiculosUnicos.size;
+            }
         }
 
         const tbody = document.querySelector('#tableHistorial tbody');
@@ -352,12 +389,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            const finalDescription = `${checklistSummary ? '[Checklist: ' + checklistSummary + ']\\n' : ''}Móvil: ${document.getElementById('mantMovil').value}. Conductor: ${document.getElementById('mantConductor').value || 'Desconocido'}. ` + document.getElementById('mantDesc').value;
+            const finalDescription = `${checklistSummary ? '[Checklist: ' + checklistSummary + ']\\n' : ''}Conductor: ${document.getElementById('mantConductor').value || 'Desconocido'}. ` + document.getElementById('mantDesc').value;
 
             const payload = {
                 type: 'mantencion',
                 // Enviamos como driver el nombre del mecánico para asegurar el origen
                 driver: 'Mecánico - ' + (user ? user.name : 'Desc'),
+                movil: document.getElementById('mantMovil').value,
                 tipo: document.getElementById('mantTipo').value,
                 kilometraje: document.getElementById('mantKm').value,
                 descripcion: finalDescription,
@@ -368,18 +406,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
             await API.sendData(payload);
             window.setBtnLoading('btnSubmitMantMech', false, 'Registrar Mantención');
-            showToast('¡Mantención registrada con éxito!', 'success');
             document.getElementById('formMantencionMech').reset();
             document.getElementById('mantPreviewMech').style.display = 'none';
             
             // Recargar datos
             loadMechanicData();
+
+            // Mostrar pantalla de éxito (igual que el conductor)
+            showMechSuccessScreen();
         } catch (error) {
             window.setBtnLoading('btnSubmitMantMech', false, 'Registrar Mantención');
             showToast('Error al guardar: ' + error.message, 'error');
         }
     });
 });
+
+// --- Pantalla de éxito del Mecánico ---
+function showMechSuccessScreen() {
+    const overlay = document.getElementById('successOverlay');
+    if (overlay) {
+        if (navigator.vibrate) navigator.vibrate(200);
+        overlay.style.display = 'flex';
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            // Volver a la sección de historial usando la función del mecánico
+            if (typeof switchMechTab === 'function') {
+                switchMechTab('historial');
+            }
+            window.scrollTo(0, 0);
+        }, 2000);
+    } else {
+        showToast('¡Mantención registrada con éxito!', 'success');
+    }
+}
+
+
 
 // --- Funciones UX Mecánico ---
 

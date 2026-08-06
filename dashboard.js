@@ -127,6 +127,16 @@ async function loadData() {
                 const match = record.descripcion.match(/Móvil:\s*([^.]+)\./);
                 if (match && match[1]) return match[1].trim();
             }
+            
+            // Buscar primero en la lista de usuarios configurados
+            try {
+                const usersList = JSON.parse(localStorage.getItem('serfover_users')) || [];
+                const userObj = usersList.find(u => u.name === record.driver);
+                if (userObj && userObj.truck && userObj.truck.trim() !== '') {
+                    return userObj.truck.trim().toUpperCase();
+                }
+            } catch(e) {}
+            
             return driverMovilMap[record.driver] || 'Sin Asignar';
         };
 
