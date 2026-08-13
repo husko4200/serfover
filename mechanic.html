@@ -190,6 +190,18 @@
                         </div>
                     </div>
 
+                    <!-- PENDIENTES (Mecánico) -->
+                    <h4 class="section-title" style="margin-bottom: 0.75rem;">&#128221; Mis Pendientes</h4>
+                    <div style="background: var(--glass-bg-strong); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); padding: 1.25rem; border-radius: var(--radius-md); margin-bottom: 1.75rem; border: 1px solid rgba(59, 130, 246, 0.2);">
+                        <form id="mechanicTodoForm" style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                            <input type="text" id="mechanicTodoInput" placeholder="Añadir nueva tarea o pendiente..." style="flex: 1; padding: 0.6rem 1rem; border-radius: 50px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-primary);" required>
+                            <button type="submit" class="btn-primary" style="padding: 0.6rem 1.2rem; border-radius: 50px; cursor: pointer; white-space: nowrap;">Añadir</button>
+                        </form>
+                        <div id="mechanicTodoList" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 250px; overflow-y: auto; padding-right: 0.5rem;">
+                            <!-- Tareas aquí -->
+                        </div>
+                    </div>
+
                     <h4 style="margin-bottom: 1rem; color: var(--text-primary); font-size: 1.05rem;">Módulos de Gestión</h4>
                     <div class="actions-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
                         <button onclick="switchMechTab('mantencion')" class="action-card">
@@ -215,23 +227,24 @@
                     
                     <!-- HISTORIAL DE MANTENCIONES -->
                     <div id="mech-historial" class="tab-content">
-                        <div class="card-header" style="flex-wrap: wrap; gap: 1rem;">
+                        <div class="card-header" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
                             <h3 class="card-title">Historial de Mantenciones Realizadas</h3>
-                            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <label for="monthFilter" style="font-size: 0.85rem; color: var(--text-secondary);">Mes:</label>
-                                    <input type="month" id="monthFilter" style="width: auto; padding: 0.4rem 0.6rem; min-height: 38px;" onchange="loadMechanicData()">
+                            
+                            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; width: 100%; background: rgba(0,0,0,0.15); padding: 1rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.05);">
+                                <div style="display: flex; flex-direction: column; gap: 0.3rem; flex: 1; min-width: 150px;">
+                                    <label for="monthFilter" style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Filtrar por Mes</label>
+                                    <input type="month" id="monthFilter" style="width: 100%; padding: 0.6rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-primary);" onchange="loadMechanicData()">
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <label for="movilFilter" style="font-size: 0.85rem; color: var(--text-secondary);">Móvil:</label>
-                                    <input type="text" id="movilFilter" placeholder="Ej: PSJk56" style="width: 120px; padding: 0.4rem 0.6rem; min-height: 38px;" oninput="loadMechanicData()">
+                                <div style="display: flex; flex-direction: column; gap: 0.3rem; flex: 1; min-width: 150px;">
+                                    <label for="movilFilter" style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Buscar Móvil</label>
+                                    <input type="text" id="movilFilter" placeholder="Ej: PSJK56" style="width: 100%; padding: 0.6rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-primary); text-transform: uppercase;" oninput="loadMechanicData()">
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <label for="driverFilter" style="font-size: 0.85rem; color: var(--text-secondary);">Origen:</label>
-                                    <select id="driverFilter" style="width: auto; padding: 0.4rem 0.6rem; min-height: 38px;" onchange="loadMechanicData()">
-                                        <option value="">Todos</option>
-                                        <option value="mecanico">Mecánico</option>
-                                        <option value="conductor">Conductor</option>
+                                <div style="display: flex; flex-direction: column; gap: 0.3rem; flex: 1; min-width: 150px;">
+                                    <label for="driverFilter" style="font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Filtrar por Origen</label>
+                                    <select id="driverFilter" style="width: 100%; padding: 0.6rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); color: var(--text-primary);" onchange="loadMechanicData()">
+                                        <option value="">Todos los orígenes</option>
+                                        <option value="mecanico">Solo Mecánico</option>
+                                        <option value="conductor">Solo Conductor</option>
                                     </select>
                                 </div>
                             </div>
@@ -297,6 +310,7 @@
                                     <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--text-secondary); color:var(--text-primary); text-align:left; padding:0.5rem;" onclick="toggleChecklist('Neumáticos', this)">⚪ Neumáticos</button>
                                     <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--text-secondary); color:var(--text-primary); text-align:left; padding:0.5rem;" onclick="toggleChecklist('Frenos', this)">⚪ Frenos</button>
                                     <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--text-secondary); color:var(--text-primary); text-align:left; padding:0.5rem;" onclick="toggleChecklist('Aceite', this)">⚪ Aceite</button>
+                                    <button type="button" class="btn" style="background:var(--glass-bg); border: 1px solid var(--text-secondary); color:var(--text-primary); text-align:left; padding:0.5rem;" onclick="toggleChecklist('Engrase', this)">⚪ Engrase</button>
                                 </div>
                             </div>
 

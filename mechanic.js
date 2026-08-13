@@ -308,17 +308,19 @@ async function loadMechanicData() {
         }
 
         misMantenciones.forEach((m, i) => {
-            const movil = m._parsedMovil || 'No especificado';
+            const movil = m._parsedMovil ? m._parsedMovil.toUpperCase() : 'NO ESPECIFICADO';
             const origen = m._parsedOrigen === 'mecanico' ? 'Mecánico' : 'Conductor';
+            const origenBg = m._parsedOrigen === 'mecanico' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(16, 185, 129, 0.15)';
             const origenColor = m._parsedOrigen === 'mecanico' ? 'var(--brand-secondary)' : 'var(--brand-primary)';
+            const formattedKm = m.kilometraje ? Number(m.kilometraje).toLocaleString('es-CL') : '0';
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td data-label="Fecha">${formatDate(m.fecha)}</td>
-                <td data-label="Móvil"><strong>${movil}</strong></td>
-                <td data-label="Origen"><span style="color: ${origenColor}; font-weight: bold; font-size: 0.8rem; border: 1px solid ${origenColor}; padding: 0.2rem 0.4rem; border-radius: 4px;">${origen}</span></td>
+                <td data-label="Móvil"><strong style="letter-spacing: 0.5px;">${movil}</strong></td>
+                <td data-label="Origen"><span style="background: ${origenBg}; color: ${origenColor}; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border: 1px solid ${origenColor}; padding: 0.3rem 0.6rem; border-radius: 50px;">${origen}</span></td>
                 <td data-label="Tipo">${m.tipo}</td>
-                <td data-label="Kilometraje">${m.kilometraje} km</td>
+                <td data-label="Kilometraje">${formattedKm} km</td>
                 <td data-label="Acción"><button class="view-btn" onclick="verDetalleMantencion(${i})">Ver Detalle</button></td>
             `;
             tbody.appendChild(tr);
@@ -365,6 +367,19 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('monthFilter').value = '';
     
     loadMechanicData();
+    loadMechanicTodos();
+
+    const todoForm = document.getElementById('mechanicTodoForm');
+    if (todoForm) {
+        todoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const input = document.getElementById('mechanicTodoInput');
+            if (input && input.value.trim()) {
+                addMechanicTodo(input.value.trim());
+                input.value = '';
+            }
+        });
+    }
 
     // --- Enviar Mantención Mecánico ---
     document.getElementById('formMantencionMech').addEventListener('submit', async (e) => {
@@ -461,3 +476,66 @@ function toggleChecklist(itemName, btn) {
         btn.style.background = 'var(--glass-bg)';
     }
 }
+
+// --- Pendientes (Mecánico) ---
+function loadMechanicTodos() {
+    const todos = JSON.parse(localStorage.getItem('serfover_mechanic_todos')) || [];
+    const list = document.getElementById('mechanicTodoList');
+    if (!list) return;
+
+    list.innerHTML = '';
+    if (todos.length === 0) {
+        list.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; margin-top: 0.5rem;">No tienes tareas pendientes.</p>';
+        return;
+    }
+
+    todos.forEach(todo => {
+        const item = document.createElement('div');
+        item.style.display = 'flex';
+        item.style.alignItems = 'center';
+        item.style.gap = '0.5rem';
+        item.style.padding = '0.6rem';
+        item.style.background = 'rgba(0,0,0,0.2)';
+        item.style.borderRadius = 'var(--radius-sm)';
+        item.style.border = '1px solid rgba(255,255,255,0.05)';
+        
+        item.innerHTML = `
+            <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleMechanicTodo('${todo.id}')" style="width: 1.2rem; height: 1.2rem; accent-color: var(--brand-primary); cursor: pointer;">
+            <span style="flex: 1; font-size: 0.95rem; color: ${todo.completed ? 'var(--text-muted)' : 'var(--text-primary)'}; text-decoration: ${todo.completed ? 'line-through' : 'none'};">${todo.text}</span>
+            <button onclick="deleteMechanicTodo('${todo.id}')" style="background: none; border: none; color: var(--accent-danger); cursor: pointer; padding: 0.2rem;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </button>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function addMechanicTodo(text) {
+    const todos = JSON.parse(localStorage.getItem('serfover_mechanic_todos')) || [];
+    todos.push({
+        id: 'todo_' + Date.now(),
+        text: text,
+        completed: false,
+        date: new Date().toISOString()
+    });
+    localStorage.setItem('serfover_mechanic_todos', JSON.stringify(todos));
+    loadMechanicTodos();
+}
+
+function toggleMechanicTodo(id) {
+    const todos = JSON.parse(localStorage.getItem('serfover_mechanic_todos')) || [];
+    const todo = todos.find(t => t.id === id);
+    if (todo) {
+        todo.completed = !todo.completed;
+        localStorage.setItem('serfover_mechanic_todos', JSON.stringify(todos));
+        loadMechanicTodos();
+    }
+}
+
+function deleteMechanicTodo(id) {
+    let todos = JSON.parse(localStorage.getItem('serfover_mechanic_todos')) || [];
+    todos = todos.filter(t => t.id !== id);
+    localStorage.setItem('serfover_mechanic_todos', JSON.stringify(todos));
+    loadMechanicTodos();
+}
+

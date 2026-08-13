@@ -766,14 +766,50 @@ async function loadData() {
             });
         }
 
+        renderMechanicTodosAdmin();
+
     } catch (error) {
         console.error('Error cargando datos', error);
     }
 }
 
+function renderMechanicTodosAdmin() {
+    const todos = JSON.parse(localStorage.getItem('serfover_mechanic_todos')) || [];
+    const list = document.getElementById('adminMechanicTodoList');
+    if (!list) return;
+
+    list.innerHTML = '';
+    if (todos.length === 0) {
+        list.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 1rem;">No hay tareas pendientes registradas.</p>';
+        return;
+    }
+
+    todos.forEach(todo => {
+        const item = document.createElement('div');
+        item.style.display = 'flex';
+        item.style.alignItems = 'center';
+        item.style.gap = '0.5rem';
+        item.style.padding = '0.6rem';
+        item.style.background = 'rgba(0,0,0,0.2)';
+        item.style.borderRadius = 'var(--radius-sm)';
+        item.style.border = '1px solid rgba(255,255,255,0.05)';
+        
+        item.innerHTML = `
+            <div style="width: 1.2rem; height: 1.2rem; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: ${todo.completed ? 'var(--brand-primary)' : 'rgba(255,255,255,0.1)'}; color: ${todo.completed ? '#fff' : 'transparent'};">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+            <span style="flex: 1; font-size: 0.95rem; color: ${todo.completed ? 'var(--text-muted)' : 'var(--text-primary)'}; text-decoration: ${todo.completed ? 'line-through' : 'none'};">${todo.text}</span>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">${new Date(todo.date).toLocaleDateString('es-CL')}</span>
+        `;
+        list.appendChild(item);
+    });
+}
+
 // Event listeners
 document.addEventListener('DOMContentLoaded', () => {
     loadData();
+    // Render todos explicitly here just in case loadData is delayed
+    renderMechanicTodosAdmin();
 });
 
 document.addEventListener('click', (e) => {

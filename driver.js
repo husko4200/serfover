@@ -320,8 +320,10 @@ async function loadDriverHistory() {
         // --- Historial de Mantenciones ---
         let misMantenciones = (data.mantenciones || []).filter(m => {
             const isMine = m.driver === user.name;
-            const movilMant = getMovilFromDesc(m.descripcion);
-            const isMyTruck = miMovil && movilMant && movilMant.toLowerCase() === miMovil.toLowerCase();
+            let movilMant = m.movil || getMovilFromDesc(m.descripcion) || m._movil || '';
+            movilMant = String(movilMant).trim().toLowerCase();
+            const myMovilClean = miMovil ? String(miMovil).trim().toLowerCase() : '';
+            const isMyTruck = myMovilClean !== '' && movilMant === myMovilClean;
             return isMine || isMyTruck;
         });
 
@@ -349,8 +351,10 @@ async function loadDriverHistory() {
         let totalMantMesCost = 0;
         (data.mantenciones || []).filter(m => {
             const isMine = m.driver === user.name;
-            const movilMant = getMovilFromDesc(m.descripcion);
-            const isMyTruck = miMovil && movilMant && movilMant.toLowerCase() === miMovil.toLowerCase();
+            let movilMant = m.movil || getMovilFromDesc(m.descripcion) || m._movil || '';
+            movilMant = String(movilMant).trim().toLowerCase();
+            const myMovilClean = miMovil ? String(miMovil).trim().toLowerCase() : '';
+            const isMyTruck = myMovilClean !== '' && movilMant === myMovilClean;
             return isMine || isMyTruck;
         }).forEach(m => {
             const d = new Date(m.fecha);
@@ -370,7 +374,7 @@ async function loadDriverHistory() {
             } else {
                 misMantenciones.forEach((mant, i) => {
                     const tr = document.createElement('tr');
-                    const isMechanic = (mant.driver && mant.driver.startsWith('Mecánico')) || (mant.descripcion && mant.descripcion.includes('Móvil:'));
+                    const isMechanic = mant.driver !== user.name;
                     const badge = isMechanic ? 
                         '<span style="background: var(--brand-primary); color:white; padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.7rem;">Mecánico</span>' : 
                         '<span style="background: var(--bg-hover); color: var(--text-primary); padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.7rem;">Conductor</span>';
@@ -874,13 +878,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const imageFile = document.getElementById('mantImagen').files[0];
             const base64Image = await getBase64(imageFile);
 
+            // Recopilar checklist
+            const checklistBtns = document.querySelectorAll('#driverChecklist .btn');
+            let checklistSummary = '';
+            if (checklistBtns && checklistBtns.length > 0) {
+                checklistBtns.forEach(btn => {
+                    const text = btn.innerText;
+                    if(text.includes('✅') || text.includes('❌')) {
+                        checklistSummary += text + ' | ';
+                    }
+                });
+            }
+
+            const realizadoPor = document.getElementById('mantRealizadoPor').value || 'Conductor';
+            const conductorCargo = document.getElementById('mantConductor').value || (user ? user.name : 'Desconocido');
+            const finalDescription = `${checklistSummary ? '[Checklist: ' + checklistSummary + ']\\n' : ''}Realizado por: ${realizadoPor}. Conductor a Cargo: ${conductorCargo}.\\n` + document.getElementById('mantDesc').value;
+
             const payload = {
                 type: 'mantencion',
                 driver: user ? user.name : 'Desconocido',
+                movil: document.getElementById('mantMovil').value,
                 tipo: document.getElementById('mantTipo').value,
                 kilometraje: document.getElementById('mantKm').value,
-                descripcion: document.getElementById('mantDesc').value,
-                valor: document.getElementById('mantValor').value,
+                descripcion: finalDescription,
+                valor: 0, // Como en el del mecánico, no hay valor
                 imagen: base64Image,
                 fecha: new Date().toISOString()
             };
@@ -889,6 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.setBtnLoading('btnSubmitMantencion', false, 'Registrar Mantención');
             document.getElementById('formMantencion').reset();
             document.getElementById('mantPreview').style.display = 'none';
+            if (user && user.truck) document.getElementById('mantMovil').value = user.truck;
             window.showSuccessScreen('historial-mant');
         } catch (error) {
             window.setBtnLoading('btnSubmitMantencion', false, 'Registrar Mantención');
