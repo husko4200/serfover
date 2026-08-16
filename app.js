@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Theme Management
     let pageContext = 'app';
-    if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('/')) {
+    if (window.location.pathname.endsWith('index.html') || window.location.pathname.endsWith('serfoverweb/') || window.location.pathname === '/') {
         pageContext = 'login';
     }
 
